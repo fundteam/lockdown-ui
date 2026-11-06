@@ -1,0 +1,3055 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>LOCKDOWN — ดาดฟ้าเรือ (เดโมเดินสำรวจ)</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Kanit:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --abyss: #0b1820;
+        --hull: #16303f;
+        --brass: #e6b85c;
+        --foam: #f1ece0;
+        --ink: #0a1219;
+        --mute: #8fb0bd;
+        color-scheme: dark;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--abyss);
+        color: var(--foam);
+        font-family: "Kanit", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 10px 0;
+      }
+      #game {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: stretch;
+      }
+      .px {
+        background: var(--hull);
+        box-shadow:
+          0 0 0 3px var(--ink),
+          0 0 0 5px #c9a24f,
+          0 0 0 8px var(--ink);
+      }
+      .bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 7px 10px;
+        margin: 8px 8px 4px;
+        font-family: "Silkscreen", "Kanit", monospace;
+        font-size: 13px;
+      }
+      .logo {
+        color: var(--brass);
+        letter-spacing: 3px;
+      }
+      #clock {
+        color: var(--foam);
+        font-size: 12px;
+      }
+      #c {
+        image-rendering: pixelated;
+        display: block;
+        background: #245f73;
+        align-self: center;
+        box-shadow:
+          0 0 0 3px var(--ink),
+          0 0 0 5px #c9a24f,
+          0 0 0 8px var(--ink);
+      }
+      #dlg {
+        display: flex;
+        gap: 12px;
+        padding: 10px 12px;
+        margin: 8px 8px 0;
+        min-height: 86px;
+        align-items: flex-start;
+      }
+      #pt {
+        image-rendering: pixelated;
+        width: 48px;
+        height: 48px;
+        flex: none;
+        background: #0f2430;
+        display: none;
+      }
+      #who {
+        font-family: "Silkscreen", "Kanit", sans-serif;
+        color: var(--brass);
+        font-size: 13px;
+      }
+      #say {
+        margin: 4px 0 0;
+        font-size: 15px;
+        line-height: 1.5;
+        max-width: 60ch;
+        white-space: pre-line;
+        max-height: 200px;
+        overflow: auto;
+      }
+      #hint {
+        text-align: center;
+        color: var(--mute);
+        font-size: 12px;
+        min-height: 18px;
+        margin-top: 6px;
+      }
+      #notebookToggleRow {
+        display: flex;
+        justify-content: flex-end;
+        margin: 0 8px 4px;
+        gap: 6px;
+      }
+      #nbtoggle,
+      #helpToggleIngame {
+        background: #0f2430;
+        color: var(--foam);
+        border: 1px solid #9c814d;
+        padding: 4px 9px;
+        font:
+          14px Kanit,
+          sans-serif;
+        cursor: pointer;
+      }
+      #eventPopup {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        background: rgba(2, 8, 13, 0.88);
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+      }
+      #eventCard {
+        width: min(560px, 94vw);
+        background: #142d3a;
+        border: 3px solid var(--brass);
+        box-shadow:
+          0 0 0 5px #071018,
+          0 18px 60px #000;
+        padding: 18px;
+        text-align: center;
+      }
+      #eventArt {
+        height: 130px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 76px;
+        background: linear-gradient(180deg, #203e4b, #091820);
+        border: 1px solid #6d6248;
+        margin-bottom: 12px;
+      }
+      #eventTitle {
+        font:
+          700 16px Silkscreen,
+          Kanit,
+          sans-serif;
+        color: var(--brass);
+        margin: 6px 0 10px;
+      }
+      #eventText {
+        font-size: 16px;
+        line-height: 1.65;
+        white-space: pre-line;
+        text-align: left;
+        max-height: 32vh;
+        overflow: auto;
+      }
+      #eventContinue {
+        margin-top: 14px;
+        background: var(--brass);
+        border: 0;
+        color: #101820;
+        padding: 9px 24px;
+        font:
+          16px Kanit,
+          sans-serif;
+      }
+      #pad {
+        display: none;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 18px;
+        user-select: none;
+        touch-action: none;
+      }
+      #pad .dp {
+        display: grid;
+        grid-template-columns: repeat(3, 46px);
+        grid-template-rows: repeat(2, 46px);
+        gap: 4px;
+      }
+      #pad button {
+        background: var(--hull);
+        color: var(--foam);
+        border: 0;
+        box-shadow:
+          0 0 0 2px var(--ink),
+          0 0 0 4px #c9a24f;
+        font-family: "Silkscreen", sans-serif;
+        font-size: 16px;
+        touch-action: none;
+      }
+      #pad .a {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        color: var(--brass);
+      }
+      .menu {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 6px;
+        max-height: 150px;
+        overflow: auto;
+      }
+      .menu button {
+        background: #0f2430;
+        color: var(--foam);
+        border: 0;
+        padding: 6px 10px;
+        text-align: left;
+        font:
+          15px Kanit,
+          sans-serif;
+        box-shadow:
+          0 0 0 2px var(--ink),
+          0 0 0 3px #c9a24f;
+        cursor: pointer;
+      }
+      .menu button:hover {
+        background: #1d4e63;
+        color: var(--brass);
+      }
+      #startScreen,
+      #setup {
+        width: min(560px, 94vw);
+        margin: 20px auto;
+        padding: 24px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        box-shadow:
+          0 0 0 3px var(--ink),
+          0 0 0 5px #c9a24f,
+          0 0 0 8px var(--ink);
+        background: var(--hull);
+        text-align: center;
+      }
+      #setup {
+        text-align: left;
+      }
+      #startScreen p,
+      #setup p {
+        margin: 4px 0;
+        color: var(--mute);
+        font-size: 14px;
+      }
+      .ch {
+        display: grid;
+        gap: 8px;
+      }
+      .ch button,
+      #go,
+      #startBtn,
+      #startHelpBtn,
+      #helpBtn {
+        background: #0f2430;
+        color: var(--foam);
+        border: 0;
+        padding: 10px 12px;
+        text-align: left;
+        font:
+          15px Kanit,
+          sans-serif;
+        box-shadow:
+          0 0 0 2px var(--ink),
+          0 0 0 3px #3b5565;
+        cursor: pointer;
+      }
+      .ch button small {
+        display: block;
+        color: var(--mute);
+        font-size: 12px;
+      }
+      .ch button.on {
+        box-shadow:
+          0 0 0 2px var(--ink),
+          0 0 0 4px var(--brass);
+        color: var(--brass);
+      }
+      #go,
+      #startBtn {
+        background: var(--brass);
+        color: #17191f;
+        text-align: center;
+        font-weight: 500;
+        margin-top: 6px;
+      }
+      #startHelpBtn,
+      #helpBtn {
+        background: #1d4e63;
+        color: var(--foam);
+        text-align: center;
+        font-weight: 400;
+        margin-top: 2px;
+      }
+      #stage {
+        position: relative;
+        align-self: center;
+        width: max-content;
+      }
+      #sm {
+        display: none;
+        position: absolute;
+        right: 8px;
+        top: 8px;
+        width: max-content;
+        min-width: 52%;
+        max-width: 72%;
+        max-height: calc(100% - 16px);
+        overflow: hidden;
+        background: #f8f4e8;
+        color: #1a1a22;
+        padding: 6px 8px;
+        font:
+          13px/1.35 Kanit,
+          sans-serif;
+        box-shadow:
+          0 0 0 2px #1a1a22,
+          0 0 0 4px #f8f4e8,
+          0 0 0 6px #1a1a22;
+        z-index: 3;
+      }
+      #sm .mt {
+        font:
+          700 11px Silkscreen,
+          Kanit,
+          sans-serif;
+        letter-spacing: 1px;
+        border-bottom: 2px solid #1a1a22;
+        margin: 0 0 4px 0;
+        padding-bottom: 3px;
+        text-align: center;
+      }
+      #sm .mi {
+        position: relative;
+        padding: 3px 4px 3px 16px;
+        cursor: pointer;
+      }
+      #sm .mi.sel::before {
+        content: "▶";
+        position: absolute;
+        left: 2px;
+        top: 4px;
+        font-size: 10px;
+      }
+      .menu button.sel {
+        background: #1d4e63;
+        color: var(--brass);
+        box-shadow:
+          0 0 0 2px var(--ink),
+          0 0 0 3px var(--brass);
+      }
+      .ch button.foc,
+      #go.foc,
+      #startBtn.foc,
+      #startHelpBtn.foc,
+      #helpBtn.foc {
+        box-shadow:
+          0 0 0 2px var(--ink),
+          0 0 0 4px #fff;
+      }
+      #helpModal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 30;
+        background: rgba(2, 8, 13, 0.92);
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+      }
+      #helpCard {
+        width: min(580px, 94vw);
+        max-height: 85vh;
+        background: #142d3a;
+        border: 3px solid var(--brass);
+        box-shadow:
+          0 0 0 5px #071018,
+          0 18px 60px #000;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+      }
+      #helpContent {
+        font-size: 14px;
+        line-height: 1.6;
+        overflow-y: auto;
+        text-align: left;
+        padding-right: 6px;
+        margin: 10px 0;
+      }
+      #helpClose {
+        background: var(--brass);
+        border: 0;
+        color: #101820;
+        padding: 8px 20px;
+        font:
+          16px Kanit,
+          sans-serif;
+        align-self: center;
+        cursor: pointer;
+      }
+      @media (pointer: coarse) {
+        #pad {
+          display: flex;
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 5;
+          background: rgba(11, 24, 32, 0.94);
+          padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+        }
+        body {
+          padding-bottom: 150px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- หน้าปกเริ่มเกม (Start Screen) -->
+    <section id="startScreen">
+      <b
+        class="logo"
+        style="
+          font:
+            700 32px Silkscreen,
+            sans-serif;
+          letter-spacing: 5px;
+          margin-top: 10px;
+        "
+        >LOCKDOWN</b
+      >
+      <p style="font-size: 16px; color: var(--foam)">
+        เกมสืบสวนซ่อนแอบแนวพิกเซล
+      </p>
+      <p style="margin-bottom: 12px">
+        ค้นหาความจริง ค้นห้อง ปิดคดี และเอาชีวิตรอดในสถานที่ปิดตาย
+      </p>
+      <button id="startBtn">▶ กดเพื่อเริ่มเกม</button>
+      <button id="startHelpBtn">📖 อ่านคู่มือ & บทบาท</button>
+    </section>
+
+    <!-- หน้าตั้งค่าเกม (Setup Screen) -->
+    <section id="setup" style="display: none">
+      <b
+        class="logo"
+        style="
+          font:
+            700 20px Silkscreen,
+            sans-serif;
+          letter-spacing: 3px;
+        "
+        >LOCKDOWN</b
+      >
+      <p>
+        เริ่มคดีมาจะมีผู้เสียชีวิต 2 ศพ · 14 คน · เลือกสถานที่และบทบาทของคุณ
+      </p>
+      <div class="ch">
+        <button class="on" data-map="yacht">
+          🚢 Luxury Yacht<small>3 ชั้น · 24 ห้อง</small>
+        </button>
+        <button data-map="hotel">
+          🏨 Grand Hotel<small>4 ชั้น · 32 ห้อง</small>
+        </button>
+        <button data-map="mansion">
+          🏚️ Halloween Mansion<small>3 ชั้น · 24 ห้อง</small>
+        </button>
+      </div>
+      <div class="ch">
+        <button class="on" data-role="Police">
+          👮 ตำรวจ<small>ดักซุ่มห้องตอนกลางคืน จับผิดครบ 2 ครั้งแพ้ทันที</small>
+        </button>
+        <button data-role="Detective">
+          🕵️ นักสืบ<small>ค้นห้องตอนกลางคืนเพื่อดูว่าใครอยู่ข้างใน</small>
+        </button>
+        <button data-role="Killer">
+          🎭 โจร<small>บุกสังหารห้องตอนกลางคืน มีสายลับเป็นพวก</small>
+        </button>
+        <button data-role="Spy">
+          🕶️ สายลับ<small>ค้นห้อง และรับช่วงโจมตีเมื่อโจรถูกจับ</small>
+        </button>
+      </div>
+      <p>
+        ⌨️ WASD/ลูกศร เดิน · E คุย/เลือก/ทำ action · Q ย้อนกลับ · N สมุดจด · I
+        คู่มือ · V โหวต
+      </p>
+      <button id="helpBtn">📖 คำแนะนำ & อาชีพประจำด่าน (กด I)</button>
+      <button id="go">เริ่มคดี</button>
+    </section>
+
+    <div id="helpModal">
+      <div id="helpCard">
+        <b
+          class="logo"
+          style="
+            font:
+              700 18px Silkscreen,
+              sans-serif;
+            color: var(--brass);
+            text-align: center;
+          "
+          >คู่มือ & บทบาทเฉพาะประจำด่าน</b
+        >
+        <div id="helpContent"></div>
+        <button id="helpClose">ปิดคู่มือ (E / Q / I)</button>
+      </div>
+    </div>
+
+    <main id="game" style="display: none">
+      <header class="bar px">
+        <b class="logo">LOCKDOWN</b><span id="clock">DAY 1 · 07:00</span>
+      </header>
+      <div id="stage">
+        <canvas id="c" width="320" height="192"></canvas>
+        <div id="sm"></div>
+      </div>
+      <div id="hint"></div>
+      <section id="dlg" class="px">
+        <canvas id="pt" width="48" height="48"></canvas>
+        <div>
+          <b id="who">Cabin A-101</b>
+          <p id="say">
+            เดินด้วย WASD หรือปุ่มลูกศร แล้วกด E เพื่อคุยหรือทำ action กับประตู
+          </p>
+        </div>
+      </section>
+      <div id="notebookToggleRow">
+        <button id="helpToggleIngame" onclick="openMainHelpModal()">
+          📖 คู่มือ (I)
+        </button>
+        <button id="nbtoggle" onclick="toggleNotebook()">📓 สมุดจด (N)</button>
+      </div>
+      <div id="eventPopup">
+        <div id="eventCard">
+          <div id="eventArt">🕯️</div>
+          <div id="eventTitle">ประกาศเหตุการณ์</div>
+          <div id="eventText"></div>
+          <button id="eventContinue">ดำเนินต่อ · E</button>
+        </div>
+      </div>
+      <div id="pad">
+        <div class="dp">
+          <span></span><button data-k="up">▲</button><span></span
+          ><button data-k="left">◀</button><button data-k="down">▼</button
+          ><button data-k="right">▶</button>
+        </div>
+        <button class="a" data-k="act">E</button
+        ><button class="a" data-k="vote">V</button
+        ><button class="a" data-k="notes">N</button>
+      </div>
+    </main>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const T = 16,
+        W = 20,
+        H = 12,
+        SOLID = "~R#DTP";
+      const cv = $("c"),
+        g = cv.getContext("2d");
+      g.imageSmoothingEnabled = false;
+      const pc = $("pt"),
+        pg = pc.getContext("2d");
+      pg.imageSmoothingEnabled = false;
+      const inner = (s) => "~R" + s + "R~";
+      const MAP = [
+        "~".repeat(20),
+        "~" + "R".repeat(18) + "~",
+        inner("################"),
+        inner("#D###D###D###D##"),
+        inner("================"),
+        inner("====TT=======P=S"),
+        inner("==P=======TT===="),
+        inner("================"),
+        inner("#D###D###D###D##"),
+        inner("################"),
+        "~" + "R".repeat(18) + "~",
+        "~.repeat(20)",
+      ];
+      const COLS = [3, 7, 11, 15];
+      const DOORS = [];
+      let CF = 0,
+        FLOORS = [],
+        scene = "day";
+      let currentMapKey = "yacht";
+
+      const MAPD = {
+        yacht: {
+          name: "🚢 Luxury Yacht",
+          f: [
+            ["UPPER DECK", "Cabin A-10"],
+            ["MAIN DECK", "Cabin B-10"],
+            ["LOWER DECK", "Cabin C-10"],
+          ],
+          r: [
+            "กัปตันเรือ",
+            "ต้นเรือ",
+            "ช่างเครื่อง",
+            "แม่บ้านเรือนพัก",
+            "เชฟเรือ",
+            "เจ้าหน้าที่รักษาความปลอดภัย",
+            "คนนำทาง",
+            "นักท่องเที่ยว",
+            "แพทย์ประจำเรือ",
+            "บาร์เทนเดอร์",
+          ],
+          desc: {
+            กัปตันเรือ: "รู้ตำแหน่งห้องพักของลูกเรือทุกคนตั้งแต่เริ่ม",
+            ต้นเรือ: "ตรวจพบการเข้า-ออกจากเรือช่วงดึก",
+            ช่างเครื่อง: "รู้ว่าห้องไหนระบบไฟขัดข้องตอนกลางคืน",
+            แม่บ้านเรือนพัก:
+              "รู้ว่าใครพักห้องไหนในชั้นของตัวเอง และแชร์ข้อมูลให้ในที่ประชุม",
+            เชฟเรือ: "สังเกตการหายไปของอุปกรณ์ในครัว",
+            บาร์เทนเดอร์: "แอบได้ยินบทสนทนาของผู้โดยสารช่วงเย็น",
+          },
+        },
+        hotel: {
+          name: "🏨 Grand Hotel",
+          f: [
+            ["ROOFTOP FLOOR", "Room R-10"],
+            ["SUITE FLOOR", "Room S-20"],
+            ["DELUXE FLOOR", "Room D-30"],
+            ["STANDARD FLOOR", "Room St-40"],
+          ],
+          r: [
+            "พนักงานต้อนรับ",
+            "แม่บ้านประจำชั้น",
+            "เชฟโรงแรม",
+            "พนักงานยกกระเป๋า",
+            "ผู้จัดการโรงแรม",
+            "รปภ. โรงแรม",
+            "เจ้าหน้าที่บรรณารักษ์",
+            "แพทย์",
+            "สายสืบโรงแรม",
+            "แขกผู้เข้าพัก",
+          ],
+          desc: {
+            พนักงานต้อนรับ:
+              "มีสมุดลงทะเบียนแขก รู้เลขห้องของแขก 2 คนตั้งแต่เริ่ม",
+            แม่บ้านประจำชั้น: "รู้ว่าใครพักห้องไหนในชั้นของตัวเอง",
+            ผู้จัดการโรงแรม: "ได้รับการแจ้งเตือนเมื่อเกิดเหตุการณ์ความวุ่นวาย",
+            พนักงานยกกระเป๋า: "เห็นผู้เข้าพักเดินทางเข้าออกห้องพักช่วงค่ำ",
+          },
+        },
+        mansion: {
+          name: "🏚️ Halloween Mansion",
+          f: [
+            ["ATTIC FLOOR", "Suite At-"],
+            ["GROUND FLOOR", "Room G-10"],
+            ["BASEMENT FLOOR", "Cell B-0"],
+          ],
+          r: [
+            "บาทหลวง",
+            "หมอผี",
+            "ผู้ดูแลคฤหาสน์",
+            "คนรับใช้",
+            "พ่อบ้าน",
+            "คนสวน",
+            "ผู้เฝ้าประตู",
+            "ร่างทรง",
+            "คนสนิท",
+            "ผู้มาเยือน",
+          ],
+          desc: {
+            พ่อบ้าน: "รู้ตำแหน่งห้องพักของทุกคนในชั้น ground floor",
+            ผู้ดูแลคฤหาสน์: "รู้ว่าห้องไหนถูกล็อกหรือเปิดอยู่ช่วงกลางคืน",
+            ร่างทรง: "รับรู้ถึงวิญญาณของผู้เสียชีวิตล่าสุด",
+            คนสวน: "เห็นร่องรอยการเคลื่อนไหวนอกตัวคฤหาสน์",
+          },
+        },
+      };
+
+      const MAIN_ROLES_HELP = {
+        "👮 ตำรวจ":
+          "ตอนกลางคืนเลือกห้องดักซุ่ม หากโจรบุกห้องนั้นจะจับกุมได้ทันที (จับผิดครบ 2 ครั้งแพ้)",
+        "🕵️ นักสืบ": "ตอนกลางคืนสืบค้น 1 ห้องเพื่อดูว่าใครพักอยู่",
+        "🎭 โจร (Killer)": "ตอนกลางคืนบุกสังหารเหยื่อในห้องพัก มีสายลับเป็นพวก",
+        "🕶️ สายลับ (Spy)":
+          "ค้นห้องส่งข้อมูลให้โจร และหากโจรถูกจับ/ตาย จะเลื่อนขั้นขึ้นมาเป็นโจรสังหารแทน!",
+        "🙂 พลเรือน / แขก":
+          "ไม่มีพลังพิเศษ ใช้การวิเคราะห์เบาะแส คำพูด และการสังเกต",
+      };
+
+      const LAMPS = [
+        [4, 1],
+        [9, 1],
+        [14, 1],
+        [4, 10],
+        [9, 10],
+        [14, 10],
+      ];
+
+      const MASTER_STATEMENTS = [
+        function (n) {
+          return `ตัวผมพักอยู่ห้อง ${DOORS[n.door].name} ฝั่งโซน ${FLOORS[n.fl]} ค่อนข้างสงบดีนะ`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} ของผมนี่อับลมจัง หรือใครแอบมาเดินแถวโซนนี้รึเปล่าเมื่อคืน`;
+        },
+        function (n) {
+          return `ผมพักอยู่ห้อง ${DOORS[n.door].name} ช่วงดึกได้ยินเสียงกุกกักแถวทางเดินโซนนี้ด้วยแหละ`;
+        },
+        function (n) {
+          return `อยู่ห้อง ${DOORS[n.door].name} คนเดียวมันวังเวงพิลึก ยิ่งดึกยิ่งเงียบสนิทเลย`;
+        },
+        function (n) {
+          return `ห้องพักของผมคือ ${DOORS[n.door].name} ตั้งอยู่แถวโซน ${FLOORS[n.fl]} ปลอดภัยดีอยู่หรอก`;
+        },
+        function (n) {
+          return `ใครมาเดินป้วนเปี้ยนอยู่หน้าห้อง ${DOORS[n.door].name} ของผมตอนดึกๆ ชวนสงสัยชะมัด`;
+        },
+        function (n) {
+          return `ผมจำได้ว่ามีคนเดินผ่านห้อง ${DOORS[n.door].name} ช่วงตีสองด้วย เสียงฝีเท้าชัดเจนมาก`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} ของผมนี่อยู่ใกล้ห้องมุมโซน ${FLOORS[n.fl]} ได้ยินเสียงแปลกๆ บ่อยมาก`;
+        },
+        function (n) {
+          return `ผมนอนอยู่ในห้อง ${DOORS[n.door].name} ตลอดคืน ล็อกกลอนแน่นหนาดี ไม่ได้ออกไปไหนเลย`;
+        },
+        function (n) {
+          return `ใครมาเคาะประตูห้อง ${DOORS[n.door].name} ตอนดึกๆ หรือผมหูแว่วไปเองกันแน่นะ`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} อยู่ในโซน ${FLOORS[n.fl]} ค่อนข้างเงียบเหงาและน่ากลัวตอนกลางคืน`;
+        },
+        function (n) {
+          return `ตอนดึกๆ ผมได้ยินเสียงเปิดปิดประตูห้องใกล้ๆ กับ ${DOORS[n.door].name} หลายรอบเลย`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} ของผมมองเห็นระเบียงโซนนี้พอดี เห็นเงาคนเดินผ่านแวบๆ ด้วย`;
+        },
+        function (n) {
+          return `ผมพักอยู่ห้อง ${DOORS[n.door].name} ถ้าใครมีเบาะแสอะไรมาบอกกันบ้างนะ`;
+        },
+        function (n) {
+          return `ดึกๆ แถวห้อง ${DOORS[n.door].name} มีเสียงลมตีกับประตูเสียงดังจนผมนอนไม่หลับเลย`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} ของผมปลอดภัยดี แต่เพื่อนบ้านห้องถัดไปดูมีพิรุธแปลกๆ`;
+        },
+        function (n) {
+          return `ผมอยู่ห้อง ${DOORS[n.door].name} โซน ${FLOORS[n.fl]} เห็นใครบางคนเดินลับๆ ล่อๆ แถวนี้ตอนค่ำ`;
+        },
+        function (n) {
+          return `เมื่อคืนตอนตีสาม ได้ยินเสียงกระซิบเบาๆ ลอดผ่านช่องใต้ประตูห้อง ${DOORS[n.door].name} มาด้วย`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} ของผมอยู่ลึกสุดทางเดิน โคตรจะวังเวงเวลาดึกๆ ดื่นๆ`;
+        },
+        function (n) {
+          return `ใครมาลองบิดลูกบิดประตูห้อง ${DOORS[n.door].name} ของผมเมื่อคืนวะเนี่ย น่ากลัวชะมัด`;
+        },
+        function (n) {
+          const other = alive().filter((c) => c !== n);
+          const target = other.length ? rnd(other).name : "ใครบางคน";
+          return `ผมเห็น ${target} เดินวนเวียนอยู่ใกล้โซนห้อง ${DOORS[n.door].name} ช่วงค่ำๆ ด้วยนะ`;
+        },
+        function (n) {
+          const other = alive().filter((c) => c !== n);
+          const target = other.length ? rnd(other).name : "ใครบางคน";
+          return `รู้สึกว่า ${target} จะพักอยู่ไม่ไกลจากห้อง ${DOORS[n.door].name} ของผมเท่าไหร่เลย`;
+        },
+        function (n) {
+          const other = alive().filter((c) => c !== n);
+          const target = other.length ? rnd(other).name : "ใครคนนั้น";
+          return `ตอนดึกๆ ฉันเห็น ${target} แอบมองลอดช่องประตูห้องคนอื่น น่าสงสัยจริงๆ`;
+        },
+        function (n) {
+          const other = alive().filter((c) => c !== n);
+          const target = other.length ? rnd(other).name : "เพื่อนร่วมทาง";
+          return `ฉันบังเอิญเดินสวนกับ ${target} แถวโซน ${FLOORS[n.fl]} ตอนดึก สีหน้าเขารีบร้อนมาก`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} ของผมอยู่ใกล้บันได ได้ยินเสียงคนเดินขึ้นลงตอนดึกตลอดเลย`;
+        },
+        function (n) {
+          return `โซน ${FLOORS[n.fl]} ที่ห้อง ${DOORS[n.door].name} ผมอยู่ มีกลิ่นอับแปลกๆ ลอยมาตอนตีสอง`;
+        },
+        function (n) {
+          return `ผมอยู่ในห้อง ${DOORS[n.door].name} ได้ยินเสียงของหนักตกกระแทกพื้นจากห้องข้างๆ ดังสนั่น`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} ปลอดภัยดีครับ แต่ผมไม่แน่ใจว่าห้องอื่นเป็นยังไงบ้าง`;
+        },
+        function (n) {
+          return `ช่วงหัวค่ำผมเห็นใครบางคนเคาะเรียกเจ้าของห้อง ${DOORS[n.door].name} แต่ไม่มีใครเปิด`;
+        },
+        function (n) {
+          return `ผมพักที่ห้อง ${DOORS[n.door].name} โซนนี้เงียบจนได้ยินเสียงหัวใจตัวเองเต้นเลยล่ะ`;
+        },
+        function (n) {
+          return `มีเสียงฝีเท้าคนวิ่งหนีผ่านหน้าห้อง ${DOORS[n.door].name} ของผมไปทางปีกซ้ายเมื่อคืน`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} ของผมหน้าต่างล็อกสนิทดี ไม่มีใครแอบเข้าทางนี้แน่ๆ`;
+        },
+        function (n) {
+          return `ดึกๆ ผมแอบเปิดแง้มประตูห้อง ${DOORS[n.door].name} ดู เห็นทางเดินมืดตื๋อและน่ากลัวมาก`;
+        },
+        function (n) {
+          return `ผมอยู่ห้อง ${DOORS[n.door].name} ไม่เห็นใครเดินผ่านโซนนี้เลยตั้งแต่เที่ยงคืน`;
+        },
+        function (n) {
+          return `มีเสียงเหมือนโลหะกระทบกันดังมาจากห้องใกล้ ${DOORS[n.door].name} ตอนตีสองครับ`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} ของผมค่อนข้างอับลม เลยแอบเปิดประตูทิ้งไว้แป๊บ1ช่วงเย็น`;
+        },
+        function (n) {
+          return `ผมได้ยินเสียงคนไอเบาๆ 3 ครั้งติดกันหน้าห้อง ${DOORS[n.door].name} ตอนดึกสงัด`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} อยู่ใกล้ห้องน้ำรวม ได้ยินเสียงเปิดน้ำก๊อกไหลทั้งคืนเลย`;
+        },
+        function (n) {
+          return `ผมพักที่ ${DOORS[n.door].name} ครับ เห็นคนเดินสลับชั้นไปมาช่วงค่ำด้วยแหละ`;
+        },
+        function (n) {
+          return `มีเสียงถอนหายใจยาวๆ ดังมาจากหน้าห้อง ${DOORS[n.door].name} ตอนตีสี่ ขนลุกชะมัด`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} ของผมไม่มีอะไรผิดปกติ แต่ห้องอื่นผมไม่รู้นะ`;
+        },
+        function (n) {
+          return `ผมได้ยินเสียงกระซิบภาษาแปลกๆ แถวผนังห้อง ${DOORS[n.door].name} ตอนใกล้รุ่งสาง`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} อยู่มุมอับพอดี ใครทำอะไรแถวนี้ผมมองไม่ค่อยเห็นหรอก`;
+        },
+        function (n) {
+          return `ช่วงค่ำมีคนมาเดินป้วนเปี้ยนใกล้ห้อง ${DOORS[n.door].name} แล้วก็รีบเดินหนีไปไวมาก`;
+        },
+        function (n) {
+          return `ผมพักอยู่ห้อง ${DOORS[n.door].name} ล็อกประตูใส่กลอนเหล็กสองชั้นปลอดภัยแน่นอน`;
+        },
+        function (n) {
+          return `ได้ยินเสียงกระจกหน้าต่างห้องแถวโซน ${FLOORS[n.fl]} สั่นกระพือตอนดึก น่ากลัวชะมัด`;
+        },
+        function (n) {
+          return `ห้อง ${DOORS[n.door].name} ของผมอยู่ใกล้จุดอับสายตา ใครเดินผ่านต้องระวังตัวหน่อย`;
+        },
+        function (n) {
+          return `ผมอยู่ในห้อง ${DOORS[n.door].name} ตลอด ไม่ได้ยินเสียงเรียกหรือเสียงเคาะใดๆ ทั้งสิ้น`;
+        },
+        function (n) {
+          return `ดึกๆ แถวห้อง ${DOORS[n.door].name} มีเสียงกุกกักเหมือนคนพยายามงัดแงะอะไรสักอย่าง`;
+        },
+        function (n) {
+          return `ผมจำได้แม่นว่ามีคนเดินผ่านหน้าห้อง ${DOORS[n.door].name} ตอนตีสองครึ่งครับ`;
+        },
+        "ตอนดึกๆ เหมือนได้ยินเสียงฝีเท้าคนเดินย่องผ่านหน้าห้องไปมา",
+        "ได้ยินเสียงกุกกักดังมาจากห้องแถวๆ ปีกขวาตอนดึกสงัด",
+        "มีเสียงเหมือนของหนักๆ หล่นกระแทกพื้นตอนตีสอง ใครทำอะไรกัน?",
+        "ได้ยินเสียงคนกระซิบกันเบาๆ แถวทางเดินตอนดึกด้วยแหละ",
+        "คืนนี้ลมแรงจนประตูห้องกระแทกเสียงดัง น่ากลัวชะมัด",
+        "ได้ยินเสียงเปิดปิดประตูห้องน้ำส่วนกลางดึกๆ น่าสงสัยนะ",
+        "มีเสียงคนวิ่งตึงตังผ่านหน้าห้องพักช่วงตีสาม ใครวิ่งกัน?",
+        "ได้ยินเสียงโลหะกระทบกันกริ๊งกร้างแวบหนึ่งตอนดึก",
+        "เงียบจนได้ยินเสียงนาฬิกาเดิน แต่ไม่มีเสียงคนเดินเลยนะ",
+        "ได้ยินเสียงถอนหายใจดังมาจากหน้าห้องตอนดึก ใครมาแอบยืนแถวนี้?",
+        "เหมือนได้ยินเสียงคนทะเลาะกันเบาๆ แวบหนึ่งช่วงดึก",
+        "ได้ยินเสียงลากเก้าอี้หรือลากของแปลกๆ จากชั้นบนลงมา",
+        "ตอนตีสองได้ยินเสียงกระจกกระทบกันเบาๆ ไม่รู้มาจากห้องไหน",
+        "ได้ยินเสียงฝีเท้าคนใส่รองเท้าหนังเดินวนเวียนแถวนี้",
+        "ได้ยินเสียงเปิดหน้าต่างดังเอี๊ยดอ๊าดตอนดึก",
+        "มีเสียงคนไอเบาๆ 3 ครั้งติดกันหน้าห้องเมื่อคืน",
+        "ได้ยินเสียงคลื่นซัดแรงกว่าปกติ พร้อมๆ กับเสียงฝีเท้า",
+        "เสียงฝีเท้านั้นหยุดอยู่หน้าห้องผมพักหนึ่ง แล้วก็เดินจากไป น่ากลัวมาก",
+        "ได้ยินเสียงพึมพำฟังไม่ศัพท์ช่วงดึก เหมือนคนคุยกันคนเดียว",
+        "ช่วงตีสามมีเสียงก๊อกแก๊กที่ลูกบิดประตูห้องผมด้วยนะ",
+        "ได้ยินเสียงเหมือนคนพยายามงัดแงะอะไรสักอย่าง แถวห้องใกล้เคียง",
+        "เสียงประหลาดตอนดึกทำให้ฉันสะดุ้งตื่นและนอนไม่หลับจนเช้า",
+        "ได้ยินเสียงเหมือนของเหลวหยดติ๋ๆ ยาวนานตลอดคืน หลอนมาก",
+        "มีเสียงร้องครางเบาๆ ลอดมาตามช่องลม น่ากลัวจนไม่กล้าขยับตัว",
+        "ได้ยินเสียงฝีเท้าวิ่งหนีอย่างลนลานผ่านหน้าห้องไปตอนตีสี่",
+        "ช่วงเย็นๆ ฉันเห็นใครบางคนเดินลับๆ ล่อๆ อยู่แถวบันได",
+        "เห็นบางคนถือของแปลกๆ เดินผ่านหน้าห้องพักช่วงหัวค่ำ",
+        "มีคนเดินสวนกับฉันที่ทางเดินช่วงใกล้ค่ำ แต่เขาไม่ยอมทักเลย",
+        "ฉันเห็นปฏิกิริยาแปลกๆ ของบางคนตอนกินมื้อค่ำ ดูมีพิรุธมาก",
+        "เห็นเงาตะคุ่มๆ เดินขึ้นบันไดไปชั้นบนตอนดึกๆ ด้วย",
+        "มีคนมายืนด้อมๆ มองๆ แถวโซนห้องพักของฉันช่วงเย็น",
+        "ฉันเห็นบางคนรีบเดินเข้าห้องตัวเองอย่างรวดเร็วตอนค่ำๆ",
+        "เห็นคนกลุ่มนึงกระซิบกระซาบกันที่ห้องโถงก่อนแยกย้าย",
+        "มีคนเดินผ่านหน้าห้องฉันไปทางโซนด้านหลังตอนดึก",
+        "ฉันเห็นสายตาแปลกๆ มองมาทางฉันตอนอยู่ในห้องอาหาร",
+        "เหมือนจะเห็นคนแอบเปิดประตูห้องคนอื่นตอนไม่มีใครอยู่",
+        "ช่วงเย็นเห็นใครบางคนเดินตรวจตราแถวระเบียงนานผิดปกติ",
+        "เห็นคนเดินลงมาจากชั้นบนด้วยท่าทางลุกลี้ลุกลน",
+        "มีคนมาเคาะเรียกเพื่อนข้างห้องแล้วก็รีบเดินหนีไป",
+        "เห็นคนยืนเหม่อมองทะเลคนเดียวสีหน้าเคร่งเครียดมาก",
+        "มีคนเดินสลับชั้นไปมาช่วงค่ำ ทั้งที่ควรจะพักผ่อนได้แล้ว",
+        "ฉันเห็นแผ่นกระดาษแปลกๆ ตกอยู่แถวทางเดินโซนนี้ด้วย",
+        "เห็นใครบางคนรีบซ่อนบางอย่างไว้ข้างหลังตอนเดินสวนกัน",
+        "มีคนพยายามลองบิดลูกบิดประตูห้องคนอื่นตอนดึกๆ หรือฉันตาฝาด?",
+        "เห็นคนเดินก้มหน้าก้มตาไม่ยอมสบตาใครเลยตั้งแต่เช้า",
+        "(นั่งตัวสั่นกอดเข่า) อย่ามาถามฉันเลย ฉันกลัวจนแทบจะประสาทกินอยู่แล้ว",
+        "ได้โปรด... อย่ามายุ่งกับฉันเลย ฉันไม่อยากตกเป็นเป้าหมายนะ",
+        "(มองซ้ายมองขวาด้วยความหวาดระแวง) ที่นี่ไม่ปลอดภัย... เราต้องหนีไปให้พ้น",
+        "ฉันไม่อยากพูดอะไรทั้งนั้น ปล่อยให้ฉันอยู่คนเดียวเถอะ ขอร้องล่ะ",
+        "(เสียงสั่นเครือ) ใครๆ ก็อาจจะเป็นฆาตกรได้ทั้งนั้นแหละ... ใครจะไปไว้วางใจใครได้",
+      ];
+
+      function drawChar(c, x, y, dir, fr, p, sc) {
+        sc = sc || 1;
+        const R = (a, b, w, h, col) => {
+          c.fillStyle = col;
+          c.fillRect(x + a * sc, y + b * sc, w * sc, h * sc);
+        };
+        R(3, 15, 10, 1, "rgba(0,0,0,.3)");
+        const lL = fr === 1 ? 3 : 4,
+          lR = fr === 2 ? 3 : 4;
+        R(5, 11, 3, lL, p.pants);
+        R(8, 11, 3, lR, p.pants);
+        R(5, 11 + lL, 3, 1, "#1b1b22");
+        R(8, 11 + lR, 3, 1, "#1b1b22");
+        const side = dir === "left" || dir === "right";
+        R(side ? 5 : 4, 6, side ? 6 : 8, 5, p.shirt);
+        if (!side) {
+          R(3, 6, 1, 4, p.shirt);
+          R(12, 6, 1, 4, p.shirt);
+          R(3, 10, 1, 1, p.skin);
+          R(12, 10, 1, 1, p.skin);
+        } else R(dir === "left" ? 4 : 11, 7, 1, 4, p.shirt);
+        R(4, 0, 8, 7, p.skin);
+        if (dir === "up") R(4, 0, 8, 5, p.hair);
+        else {
+          R(4, 0, 8, 2, p.hair);
+          if (side) R(dir === "left" ? 9 : 4, 0, 3, 5, p.hair);
+          else {
+            R(4, 2, 1, 2, p.hair);
+            R(11, 2, 1, 2, p.hair);
+          }
+        }
+        if (dir === "down") {
+          R(6, 3, 1, 2, "#1a1a1a");
+          R(9, 3, 1, 2, "#1a1a1a");
+        }
+        if (dir === "left") R(5, 3, 1, 2, "#1a1a1a");
+        if (dir === "right") R(10, 3, 1, 2, "#1a1a1a");
+      }
+      const PAL = {
+        me: {
+          skin: "#f0c8a0",
+          hair: "#2b1d16",
+          shirt: "#e6b85c",
+          pants: "#2b3a55",
+        },
+        chai: {
+          skin: "#d9a679",
+          hair: "#cfcfcf",
+          shirt: "#3f6f8f",
+          pants: "#33384a",
+        },
+        pim: {
+          skin: "#f3d2b3",
+          hair: "#1e1620",
+          shirt: "#f1ece0",
+          pants: "#5a3d6b",
+        },
+        o: {
+          skin: "#c68a5e",
+          hair: "#3a2a1c",
+          shirt: "#d96767",
+          pants: "#2c2c34",
+        },
+        nok: {
+          skin: "#f0c8a0",
+          hair: "#8a3d2b",
+          shirt: "#69bd91",
+          pants: "#3b4a3f",
+        },
+        ta: {
+          skin: "#b97b51",
+          hair: "#15151a",
+          shirt: "#78a9df",
+          pants: "#4a3a2a",
+        },
+      };
+      const NPCS = [
+        {
+          name: "ลุงชัย",
+          door: 1,
+          pal: PAL.chai,
+          lines: [
+            "อากาศดีนะ แต่ผมไม่ชอบเลยที่เรือเงียบแบบนี้",
+            "เมื่อคืนมีคนยืนหน้าห้องนานผิดปกติ ผมไม่ได้บอกว่าใครนะ",
+          ],
+          late: "ดึกแล้ว ผมกลับห้องล่ะ ล็อกประตูด้วย",
+        },
+        {
+          name: "หมอพิม",
+          door: 2,
+          pal: PAL.pim,
+          lines: [
+            "ถ้าใครรู้สึกไม่สบายให้บอกฉันได้เลย",
+            "ฉันได้ยินเสียงฝีเท้าตอนตีสอง แต่ไม่กล้าเปิดประตูดู",
+          ],
+          late: "ฉันขอตัวก่อน คืนนี้อย่าเดินคนเดียวนะ",
+        },
+        {
+          name: "เชฟโอ",
+          door: 4,
+          pal: PAL.o,
+          lines: [
+            "มื้อเย็นวันนี้ผมทำเอง ไม่มีใครแตะครัวใช่ไหม",
+            "มีดเล่มหนึ่งหายไปจากครัว ผมยังไม่อยากสรุปอะไร",
+          ],
+          late: "ผมไปนอนแล้ว ครัวปิด",
+        },
+        {
+          name: "คุณนก",
+          door: 6,
+          pal: PAL.nok,
+          lines: [
+            "ฉันนั่งดูทะเลทั้งบ่าย ไม่เห็นใครออกจากเรือเลย",
+            "ทำไมทุกคนมองกันแปลก ๆ ล่ะ",
+          ],
+          late: "ราตรีสวัสดิ์ ระวังตัวด้วยนะ",
+        },
+        {
+          name: "ต้า",
+          door: 7,
+          pal: PAL.ta,
+          lines: [
+            "ผมเป็นพนักงานที่นี่ ไม่มีกุญแจห้องใครทั้งนั้น",
+            "ผมเห็นเงาเดินผ่านช่องแสงใต้ประตูเมื่อคืน",
+          ],
+          late: "ถึงเวลาเข้าห้องแล้ว ไฟดับเร็วคืนนี้",
+        },
+      ];
+      const FLAVOR = NPCS.flatMap((n) => n.lines);
+      const NMS = [
+        "Alex",
+        "Morgan",
+        "Victoria",
+        "Daniel",
+        "Evelyn",
+        "Arthur",
+        "Charlotte",
+        "Felix",
+        "Isabelle",
+        "Henry",
+        "Olivia",
+        "Leon",
+        "Amelia",
+      ];
+
+      function initNpc(n) {
+        const d = DOORS[n.door];
+        n.fl = d.fl;
+        n.x = d.sx;
+        n.y = d.sy;
+        n.dir = "down";
+        n.ph = 0;
+        n.fr = 0;
+        n.wait = Math.random() * 2;
+        n.left = 0;
+        n.mv = "down";
+        n.hidden = false;
+        n.stuck = 0;
+        n.bed = 24 + Math.random() * 3;
+        n.wake = 0;
+        n.out = false;
+        n.shy = 0.1 + Math.random() * 0.45;
+        n.know = [];
+        n.seen = [];
+        n.spokenRoom = null;
+        n.inspectedRoom = null;
+      }
+
+      const bg = document.createElement("canvas");
+      bg.width = 320;
+      bg.height = 192;
+      const b = bg.getContext("2d");
+      function R(c, x, y, w, h, col) {
+        c.fillStyle = col;
+        c.fillRect(x, y, w, h);
+      }
+      function drawStatic() {
+        for (let ty = 0; ty < H; ty++)
+          for (let tx = 0; tx < W; tx++) {
+            const ch = MAP[ty][tx],
+              x = tx * T,
+              y = ty * T;
+            if (ch === "~") continue;
+            if (ch === "R") {
+              const hor = MAP[ty][tx - 1] === "R" || MAP[ty][tx + 1] === "R";
+              if (hor && !(tx === 1 || tx === 18)) {
+                R(b, x, y + 6, 16, 2, "#f1ece0");
+                R(b, x, y + 8, 16, 1, "#b9b3a2");
+                R(b, x, y + 3, 2, 8, "#f1ece0");
+                R(b, x + 8, y + 3, 2, 8, "#f1ece0");
+              } else {
+                R(b, x + 6, y, 3, 16, "#f1ece0");
+                R(b, x + 9, y, 1, 16, "#b9b3a2");
+                R(b, x + 6, y + 2, 3, 2, "#fff");
+              }
+              if (tx === 1 || tx === 18) R(b, x + 6, y, 3, 16, "#f1ece0");
+              continue;
+            }
+            if (ch === "#" && (ty === 2 || ty === 9)) {
+              R(b, x, y, 16, 16, "#7a4a4a");
+              for (let i = 0; i < 16; i += 4)
+                R(b, x, y + i + 3, 16, 1, "#5f3838");
+              for (let i = 0; i < 16; i += 8)
+                R(b, x + ((i + ty * 3) % 8), y, 1, 16, "#6a3f3f");
+              R(b, x, ty === 2 ? y : y + 15, 16, 1, "#3d2430");
+              continue;
+            }
+            if (ch === "#" || ch === "D") {
+              R(b, x, y, 16, 16, "#e4dcc8");
+              R(b, x, y + 15, 16, 1, "#b3a98f");
+              R(b, x, y, 16, 1, "#f6f0e0");
+              if (ch === "#" && (tx + ty) % 4 === 0) {
+                R(b, x + 4, y + 4, 8, 7, "#2b4a5e");
+                R(b, x + 4, y + 4, 8, 1, "#8fb0bd");
+                R(b, x + 7, y + 4, 2, 7, "#e4dcc8");
+              }
+              if (ch === "D") {
+                R(b, x + 2, y + 2, 12, 14, "#2f4d6b");
+                R(b, x + 3, y + 3, 10, 13, "#3a5f82");
+                R(b, x + 11, y + 9, 2, 2, "#e6b85c");
+                R(b, x + 6, y + 0, 4, 2, "#e6b85c");
+              }
+              continue;
+            }
+            R(b, x, y, 16, 16, (tx + ty) % 2 ? "#b4885a" : "#b98d5e");
+            for (let i = 3; i < 16; i += 4) R(b, x, y + i, 16, 1, "#9a7048");
+            const h = (tx * 31 + ty * 17) % 5;
+            R(b, x + 3 + h * 2, y + 1, 1, 1, "#8a6340");
+            R(b, x + 9 - h, y + 9, 1, 1, "#8a6340");
+            if (ch === "T") {
+              R(b, x + 1, y + 3, 14, 11, "#7d5a3a");
+              R(b, x + 1, y + 3, 14, 3, "#a8774d");
+              R(b, x + 4, y + 7, 3, 2, "#f1ece0");
+              R(b, x + 10, y + 7, 3, 2, "#f1ece0");
+              R(b, x + 1, y + 14, 14, 2, "rgba(0,0,0,.25)");
+            }
+            if (ch === "S") {
+              R(b, x + 1, y + 2, 14, 12, "#6b4a2e");
+              for (let i = 0; i < 4; i++)
+                R(
+                  b,
+                  x + 1,
+                  y + 3 + i * 3,
+                  14,
+                  2,
+                  i % 2 ? "#8a6340" : "#a8774d",
+                );
+              R(b, x + 6, y + 1, 4, 2, "#e6b85c");
+            }
+            if (ch === "P") {
+              R(b, x + 4, y + 10, 8, 5, "#a0503a");
+              R(b, x + 4, y + 10, 8, 1, "#c46a50");
+              R(b, x + 3, y + 4, 4, 6, "#3f8f5a");
+              R(b, x + 8, y + 2, 4, 8, "#4aa56a");
+              R(b, x + 6, y + 5, 3, 5, "#357a4c");
+            }
+          }
+      }
+      drawStatic();
+
+      let minutes = 420,
+        fade = 0,
+        lastMin = -1;
+      const P = { x: 0, y: 0, dir: "down", ph: 0, fr: 0 };
+      const keys = { up: 0, down: 0, left: 0, right: 0 };
+      const dlg = { open: false };
+      let full = "",
+        idx = 0,
+        typing = false,
+        near = null;
+
+      function solidAt(px, py) {
+        const tx = Math.floor(px / T),
+          ty = Math.floor(py / T);
+        if (tx < 0 || ty < 0 || tx >= W || ty >= H) return true;
+        return SOLID.includes(MAP[ty][tx]);
+      }
+      function hit(x, y) {
+        return (
+          solidAt(x + 4, y + 11) ||
+          solidAt(x + 11, y + 11) ||
+          solidAt(x + 4, y + 15) ||
+          solidAt(x + 11, y + 15)
+        );
+      }
+      function step(e, dx, dy) {
+        let m = false;
+        if (dx && !hit(e.x + dx, e.y)) {
+          e.x += dx;
+          m = true;
+        }
+        if (dy && !hit(e.x, e.y + dy)) {
+          e.y += dy;
+          m = true;
+        }
+        return m;
+      }
+      const hourNow = () => (minutes / 60) % 24;
+      const isNight = (h) => h >= 21 || h < 6;
+
+      function update(dt) {
+        if (typing) {
+          idx += dt * 38;
+          if (idx >= full.length) {
+            idx = full.length;
+            typing = false;
+          }
+          $("say").textContent = full.slice(0, idx | 0);
+        }
+        if (fade > 0) fade = Math.max(0, fade - dt * 1.2);
+        if (G.talking && dlg.open && !window.menuOpen) {
+          G.hold -= dt;
+          if (G.hold <= 0) {
+            G.hold = 99;
+            interact();
+          }
+        }
+        if (dlg.open) return;
+        if (scene !== "night") return;
+        minutes += dt * 5;
+        const h = hourNow();
+        if (!G.ended && h >= 5.5 && h < 12 && !G.forced) {
+          G.forced = true;
+          G.toSleep = true;
+          say(
+            "ใกล้รุ่งเช้า",
+            "ฟ้าเริ่มสางแล้ว ถึงเวลากลับเข้านอนและใช้พลังของคุณ",
+          );
+          return;
+        }
+        let dx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0),
+          dy = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+        if (dx && dy) {
+          dx *= 0.707;
+          dy *= 0.707;
+        }
+        const sp = 54 * dt;
+        if (dx || dy) {
+          if (dy) P.dir = dy < 0 ? "up" : "down";
+          else P.dir = dx < 0 ? "left" : "right";
+          if (step(P, dx * sp, dy * sp)) {
+            P.ph += sp;
+            P.fr = (((P.ph / 5) | 0) % 2) + 1;
+          } else P.fr = 0;
+        } else P.fr = 0;
+        if (!isNight(h)) NPCS.forEach((n) => npcUpdate(n, dt, h));
+        if ((obsT += dt) > 2.5) {
+          obsT = 0;
+          observe();
+        }
+        near = findNear();
+        $("hint").textContent = near
+          ? "E — " + near.label
+          : scene === "night"
+            ? "กลางคืน · เดินไปยังประตูห้องเพื่อทำ action · Q ย้อนกลับ"
+            : "";
+      }
+      function npcUpdate(n, dt, h) {
+        const hh = h < 12 ? h + 24 : h,
+          going = hh >= n.bed;
+        const d = DOORS[n.door];
+        if (n.out) {
+          n.hidden = true;
+          return;
+        }
+        if (n.hidden) {
+          if (!going) {
+            n.hidden = false;
+            n.wait = Math.random() * 2;
+          }
+          return;
+        }
+        let moved = false;
+        if (going) {
+          const tx = d.sx - n.x,
+            ty = d.sy - n.y,
+            sp = 34 * dt;
+          if (Math.abs(tx) < 2 && Math.abs(ty) < 2) {
+            n.hidden = true;
+            return;
+          }
+          const sx = Math.abs(tx) > 1 ? Math.sign(tx) * sp : 0,
+            sy = Math.abs(ty) > 1 ? Math.sign(ty) * sp : 0;
+          moved = step(n, sx, sy);
+          if (sx || sy)
+            n.dir =
+              Math.abs(tx) > Math.abs(ty)
+                ? tx < 0
+                  ? "left"
+                  : "right"
+                : ty < 0
+                  ? "up"
+                  : "down";
+          n.stuck = moved ? 0 : n.stuck + dt;
+          if (n.stuck > 1.5) {
+            n.x = d.sx;
+            n.y = d.sy;
+          }
+        } else {
+          if (n.wait > 0) {
+            n.wait -= dt;
+          } else {
+            if (n.left <= 0) {
+              n.mv = ["up", "down", "left", "right"][(Math.random() * 4) | 0];
+              n.left = T * (1 + Math.random() * 3);
+            }
+            const v = {
+                up: [0, -1],
+                down: [0, 1],
+                left: [-1, 0],
+                right: [1, 0],
+              }[n.mv],
+              sp = 26 * dt;
+            moved = step(n, v[0] * sp, v[1] * sp);
+            n.dir = n.mv;
+            if (moved) n.left -= sp;
+            else {
+              n.left = 0;
+              n.wait = 0.4 + Math.random() * 1.5;
+            }
+            if (n.left <= 0 && moved) n.wait = 0.6 + Math.random() * 2.2;
+          }
+        }
+        if (moved) {
+          n.ph += 26 * dt;
+          n.fr = (((n.ph / 4) | 0) % 2) + 1;
+        } else n.fr = 0;
+      }
+      function findNear() {
+        const cx = P.x + 8,
+          cy = P.y + 10;
+        let best = null,
+          bd = 22;
+        NPCS.forEach((n) => {
+          if (n.hidden || n.fl !== CF) return;
+          const d = Math.hypot(n.x + 8 - cx, n.y + 10 - cy);
+          if (d < bd) {
+            bd = d;
+            best = n;
+          }
+        });
+        if (best) return { kind: "npc", n: best, label: "คุยกับ" + best.name };
+        if (MAP[Math.floor((P.y + 13) / T)][Math.floor((P.x + 8) / T)] === "S")
+          return { kind: "stairs", label: "ขึ้น/ลงบันได" };
+        if (P.dir === "up" || P.dir === "down") {
+          const py = P.dir === "up" ? P.y + 6 : P.y + 20,
+            tx = Math.floor((P.x + 8) / T),
+            ty = Math.floor(py / T);
+          if (MAP[ty] && MAP[ty][tx] === "D") {
+            const i = DOORS.findIndex(
+              (d) => d.col === tx && d.row === ty && d.fl === CF,
+            );
+            return { kind: "door", i, label: "ประตู " + DOORS[i].name };
+          }
+        }
+        return null;
+      }
+
+      const EVIL = (r) => r === "Killer" || r === "Spy";
+      const GOOD_COUPLE = (r) => r === "Police" || r === "Detective";
+      const EVIL_COUPLE = (r) => r === "Killer" || r === "Spy";
+
+      function beep(f) {
+        try {
+          window.ac = window.ac || new AudioContext();
+          const o = ac.createOscillator(),
+            v = ac.createGain();
+          o.type = "square";
+          o.frequency.value = f || 520;
+          v.gain.value = 0.03;
+          o.connect(v);
+          v.connect(ac.destination);
+          o.start();
+          o.stop(ac.currentTime + 0.06);
+        } catch (e) {}
+      }
+      function say(who, txt, pal) {
+        $("who").textContent = who;
+        full = txt;
+        idx = 0;
+        typing = true;
+        dlg.open = true;
+        $("say").textContent = "";
+        if (pal) {
+          $("pt").style.display = "block";
+          pg.clearRect(0, 0, 48, 48);
+          pg.fillStyle = "#0f2430";
+          pg.fillRect(0, 0, 48, 48);
+          drawChar(pg, 0, 0, "down", 0, pal, 3);
+        } else $("pt").style.display = "none";
+        beep(pal ? 560 : 420);
+      }
+      function interact() {
+        if (window.menuOpen) return;
+        if (scene === "day" && !dlg.open) {
+          if (!G.ended) dayMenu();
+          return;
+        }
+        if (dlg.open) {
+          if (typing) {
+            idx = full.length;
+            typing = false;
+            $("say").textContent = full;
+          } else {
+            dlg.open = false;
+            afterClose();
+          }
+          return;
+        }
+        if (!near) return;
+        const h = hourNow();
+        if (near.kind === "stairs")
+          return menu(
+            "ไปชั้นไหน",
+            FLOORS.map((f, i) => ({ label: f, v: i })),
+            (v) => {
+              CF = v;
+              lastMin = -1;
+            },
+          );
+        if (near.kind === "npc") {
+          const n = near.n,
+            going = (h < 12 ? h + 24 : h) >= n.bed;
+          const dx = P.x - n.x,
+            dy = P.y - n.y;
+          n.dir =
+            Math.abs(dx) > Math.abs(dy)
+              ? dx < 0
+                ? "left"
+                : "right"
+              : dy < 0
+                ? "up"
+                : "down";
+          const tx = going ? n.late : statement(n);
+          say(n.name, tx, n.pal);
+          if (!going) {
+            n.knownRoom = true;
+            if (!n.spokenRoom) {
+              const fakeDoors = DOORS.filter((d) => d !== DOORS[n.door]);
+              n.spokenRoom =
+                EVIL(n.role) && Math.random() < 0.5 && fakeDoors.length
+                  ? rnd(fakeDoors).name
+                  : DOORS[n.door].name;
+            }
+            note("วัน " + G.day + " " + n.name + ": " + tx);
+          }
+        } else {
+          const d = DOORS[near.i],
+            victim = chars.find((c) => c.door === near.i && c.dead);
+          if (isNight(h)) {
+            if (near.i === ME.door) return endNight(null);
+            const action = {
+              Police: "ดักซุ่ม",
+              Detective: "สืบค้น",
+              Spy: "สืบค้น",
+              Killer: "บุกโจมตี",
+            }[ME.role];
+            if (action) {
+              note("คืน " + G.day + " คุณเลือก " + action + " ที่ " + d.name);
+              return endNight(near.i);
+            }
+            say(d.name, "คุณไม่มี action พิเศษกับห้องนี้");
+          } else if (victim) {
+            const owner = chars.find((c) => c.door === near.i);
+            if (owner) {
+              owner.knownRoom = true;
+              owner.inspectedRoom = DOORS[owner.door].name;
+            }
+            note("วัน " + G.day + " ตรวจ " + d.name + ": พบศพ " + victim.name);
+            say(
+              d.name,
+              "เปิดประตูเข้าไป พบศพ " +
+                victim.name +
+                " (" +
+                RN[victim.role] +
+                ") อยู่ในห้องนี้",
+            );
+          } else say(d.name, "ประตูล็อกอยู่ ไม่มีเสียงอะไรเลย");
+        }
+      }
+
+      function dark(h) {
+        if (h >= 20 || h < 5) return 0.55;
+        if (h < 8) return 0.55 * (1 - (h - 5) / 3);
+        if (h < 17) return 0;
+        return ((h - 17) / 3) * 0.55;
+      }
+      function draw() {
+        const t = performance.now() / 1000,
+          h = hourNow();
+        if (scene === "day") {
+          drawDining();
+          if (fade > 0) {
+            g.fillStyle = "rgba(0,0,0," + fade + ")";
+            g.fillRect(0, 0, 320, 192);
+          }
+          clockUp();
+          return;
+        }
+        for (let ty = 0; ty < H; ty++)
+          for (let tx = 0; tx < W; tx++) {
+            const ch = MAP[ty][tx];
+            if (ch !== "~" && ch !== "R") continue;
+            const x = tx * T,
+              y = ty * T;
+            R(g, x, y, 16, 16, "#245f73");
+            const k = (tx * 7 + ty * 3 + Math.floor(t * 1.5)) % 4;
+            R(g, x + k * 3, y + 4, 5, 1, "#3a8196");
+            R(g, x + ((k * 5 + 6) % 12), y + 11, 4, 1, "#1d4e63");
+            R(g, x + ((k * 2 + 9) % 11), y + 8, 3, 1, "#4a95a8");
+          }
+        g.drawImage(bg, 0, 0);
+        roomLabels();
+        const night = dark(h) > 0.2;
+        DOORS.forEach((d, i) => {
+          if (
+            d.fl !== CF ||
+            !NPCS.some((n) => n.hidden && !n.out && n.door === i)
+          )
+            return;
+          if (isNight(h)) {
+            R(g, d.col * T + 5, d.row * T + 5, 6, 4, "#f6d98a");
+            R(g, d.col * T + 5, d.row * T + 8, 6, 1, "#c99d4a");
+            const y0 = d.row === 3 ? (d.row + 1) * T : d.row * T - 12;
+            R(g, d.col * T - 2, y0, 20, 12, "rgba(246,217,138,.16)");
+          }
+        });
+        LAMPS.forEach(([lx, ly]) => {
+          R(g, lx * T + 7, ly * T + 1, 2, 10, "#3d3a36");
+          R(g, lx * T + 5, ly * T - 1, 6, 4, night ? "#ffd98a" : "#d8d2c0");
+        });
+        const ents = [
+          {
+            y: P.y,
+            f: () => {
+              drawChar(
+                g,
+                Math.round(P.x),
+                Math.round(P.y),
+                P.dir,
+                P.fr,
+                PAL.me,
+              );
+              tag("YOU", Math.round(P.x) + 8, Math.round(P.y) - 1, "#e6b85c");
+            },
+          },
+        ];
+        if (!isNight(h))
+          NPCS.forEach((n) => {
+            if (!n.hidden && n.fl === CF)
+              ents.push({
+                y: n.y,
+                f: () => {
+                  drawChar(
+                    g,
+                    Math.round(n.x),
+                    Math.round(n.y),
+                    n.dir,
+                    n.fr,
+                    n.pal,
+                  );
+                  tag(
+                    n.name,
+                    Math.round(n.x) + 8,
+                    Math.round(n.y) - 1,
+                    "#f1ece0",
+                  );
+                },
+              });
+          });
+        ents.sort((a, b) => a.y - b.y).forEach((e) => e.f());
+        if (near && near.kind === "npc") {
+          const n = near.n;
+          R(g, Math.round(n.x) + 6, Math.round(n.y) - 5, 4, 3, "#e6b85c");
+          R(g, Math.round(n.x) + 7, Math.round(n.y) - 2, 2, 1, "#e6b85c");
+        }
+        if (h >= 17 && h < 20) {
+          g.fillStyle = "rgba(255,150,70,.13)";
+          g.fillRect(0, 0, 320, 192);
+        }
+        const dk = dark(h);
+        if (dk > 0) {
+          g.fillStyle = "rgba(14,22,60," + dk + ")";
+          g.fillRect(0, 0, 320, 192);
+        }
+        if (night) {
+          g.globalCompositeOperation = "lighter";
+          LAMPS.forEach(([lx, ly]) => {
+            const cx = lx * T + 8,
+              cy = ly * T + 4,
+              gr = g.createRadialGradient(cx, cy, 2, cx, cy, 46);
+            gr.addColorStop(0, "rgba(255,200,110,.38)");
+            gr.addColorStop(1, "rgba(255,200,110,0)");
+            g.fillStyle = gr;
+            g.fillRect(cx - 46, cy - 46, 92, 92);
+          });
+          g.globalCompositeOperation = "source-over";
+        }
+        if (fade > 0) {
+          g.fillStyle = "rgba(0,0,0," + fade + ")";
+          g.fillRect(0, 0, 320, 192);
+        }
+        const m = Math.floor(minutes);
+        if (m !== lastMin) {
+          lastMin = m;
+          const day = Math.max(1, Math.floor((m - 360) / 1440) + 1),
+            hh = Math.floor(m / 60) % 24,
+            mm = m % 60;
+          const ph =
+            hh < 6
+              ? "ดึก"
+              : hh < 11
+                ? "เช้า"
+                : hh < 17
+                  ? "บ่าย"
+                  : hh < 21
+                    ? "เย็น"
+                    : "ค่ำ";
+          $("clock").textContent =
+            "DAY " +
+            day +
+            " · " +
+            String(hh).padStart(2, "0") +
+            ":" +
+            String(mm).padStart(2, "0") +
+            " · " +
+            ph +
+            " · " +
+            (FLOORS[CF] || "");
+        }
+      }
+
+      const RN = {
+        Police: "ตำรวจ",
+        Detective: "นักสืบ",
+        Killer: "โจร",
+        Spy: "สายลับ",
+        Civilian: "พลเรือน",
+      };
+      const NB = [],
+        note = (t) => {
+          NB.push(t);
+        };
+      let obsT = 0;
+      let noteIndex = 0,
+        eventCallback = null;
+      let playerTrust = 1.0;
+
+      function openNotes(targetBtnIndex = 0) {
+        if (dlg.open && !window.menuOpen) return;
+        const people = chars.length ? chars : [ME];
+        const p = people[noteIndex % people.length] || ME;
+
+        const isTeammate =
+          p === ME ||
+          (GOOD_COUPLE(ME.role) && GOOD_COUPLE(p.role)) ||
+          (EVIL_COUPLE(ME.role) && EVIL_COUPLE(p.role));
+
+        const realDoorName = DOORS[p.door] ? DOORS[p.door].name : "ไม่ทราบห้อง";
+        let displayRoom = "???";
+        let roomStatusColor = "#e6b85c"; // เหลือง (ไม่ยืนยัน)
+        let roomStatusText = "ยังไม่ทราบ";
+        let isNameSuspicious = false;
+
+        if (p === ME) {
+          displayRoom = realDoorName;
+          roomStatusColor = "#5ac88c";
+          roomStatusText = "ยืนยัน";
+        } else if (p.inspectedRoom) {
+          displayRoom = p.inspectedRoom;
+          if (p.inspectedRoom === realDoorName) {
+            roomStatusColor = "#5ac88c";
+            roomStatusText = "ยืนยัน";
+          } else {
+            roomStatusColor = "#e85a5a";
+            roomStatusText = "ไม่ตรง";
+            isNameSuspicious = true;
+          }
+        } else if (p.spokenRoom) {
+          displayRoom = p.spokenRoom;
+          if (p.knownRoom) {
+            if (p.spokenRoom === realDoorName) {
+              roomStatusColor = "#5ac88c";
+              roomStatusText = "ยืนยัน";
+            } else {
+              displayRoom = `<span style="text-decoration: line-through;">${escapeHtml(p.spokenRoom)}</span>`;
+              roomStatusColor = "#e85a5a";
+              roomStatusText = "ไม่ตรง";
+              isNameSuspicious = true;
+            }
+          } else {
+            roomStatusText = "ไม่ยืนยัน";
+          }
+        }
+
+        const roleText =
+          p === ME
+            ? RN[p.role] || p.role
+            : isTeammate || p.dead || p.jailed
+              ? RN[p.role] || p.role
+              : "??? (ไม่ทราบฝ่าย)";
+        const statusText = p.dead
+          ? "💀 เสียชีวิตแล้ว"
+          : p.jailed
+            ? "⛓️ ถูกควบคุมตัว"
+            : "🟢 มีชีวิตอยู่";
+        const nameDisplay = isNameSuspicious
+          ? `<span style="color: #e85a5a; font-weight:700;">${escapeHtml(p.name)} (น่าสงสัย)</span>`
+          : `<b style="font-size:12px; color:#0b1820;">${escapeHtml(p.name)}</b>`;
+
+        const rows = NB.filter(
+          (x) => x.includes(p.name) || (p === ME && x.includes("คุณ")),
+        );
+        const entriesHtml = rows.length
+          ? rows
+              .map(
+                (x) =>
+                  '<div style="padding:4px 0;border-bottom:1px solid #ccc;font-size:12px;">' +
+                  escapeHtml(x) +
+                  "</div>",
+              )
+              .join("")
+          : '<div style="padding:4px 0;font-size:12px;color:#666;">ยังไม่มีบันทึกเกี่ยวกับ ' +
+            escapeHtml(p.name) +
+            "</div>";
+
+        menu(
+          "สมุดจดคดี",
+          [
+            { label: "◀ คนก่อนหน้า (A/Left)", v: "prev" },
+            { label: "▶ คนถัดไป (D/Right)", v: "next" },
+            { label: "📜 เลื่อนดูข้อความสมุดจด", v: "scroll" },
+            { label: "✖ ปิดสมุดจด (Q/ESC)", v: "close" },
+          ],
+          (v) => {
+            if (v === "prev") {
+              noteIndex = (noteIndex - 1 + people.length) % people.length;
+              openNotes(0);
+            } else if (v === "next") {
+              noteIndex = (noteIndex + 1) % people.length;
+              openNotes(1);
+            } else if (v === "scroll") {
+              window.menuSel = 2;
+              menuHl();
+            } else {
+              if (scene === "day") dayMenu();
+            }
+          },
+        );
+
+        window.menuSel = targetBtnIndex;
+        menuHl();
+
+        const sm = $("sm");
+        const infoCard = document.createElement("div");
+        infoCard.style.cssText =
+          "margin: 4px 0; padding: 4px; background: #eae5d8; border: 1px solid #1a1a22; display: flex; gap: 8px; align-items: center;";
+
+        const cvs = document.createElement("canvas");
+        cvs.width = 44;
+        cvs.height = 44;
+        cvs.style.cssText =
+          "background:#0f2430; border:1px solid #1a1a22; image-rendering:pixelated; flex:none;";
+        const ctx = cvs.getContext("2d");
+        ctx.imageSmoothingEnabled = false;
+        drawChar(
+          ctx,
+          0,
+          0,
+          "down",
+          0,
+          p === ME ? PAL.me : p.pal || PAL.me,
+          2.8,
+        );
+
+        const meta = document.createElement("div");
+        meta.style.cssText =
+          "font-size: 11px; line-height: 1.35; color: #1a1a22;";
+        meta.innerHTML = `
+          ${nameDisplay}<br>
+          🏠 <b>ห้อง:</b> <span style="color:${roomStatusColor}; font-weight:bold;">${displayRoom} (${roomStatusText})</span><br>
+          🎭 <b>บทบาท:</b> ${escapeHtml(roleText)}<br>
+          📌 <b>สถานะ:</b> ${escapeHtml(statusText)}
+        `;
+
+        infoCard.appendChild(cvs);
+        infoCard.appendChild(meta);
+
+        const contentDiv = document.createElement("div");
+        contentDiv.id = "nbContentArea";
+        contentDiv.style.cssText =
+          "margin-top:4px; font-size:12px; height:90px; overflow-y:auto; border-top:2px solid #1a1a22; padding-top:4px; border-bottom:1px solid #ccc;";
+        contentDiv.innerHTML = entriesHtml;
+
+        sm.appendChild(infoCard);
+        sm.appendChild(contentDiv);
+      }
+
+      function openMainHelpModal() {
+        const mapInfo = MAPD[selMap] || MAPD.yacht;
+        let helpHtml = `<b style="color:#e6b85c; font-size:14px;">📌 บทบาทหลัก (ทุกด่าน):</b><br>`;
+        for (const [role, desc] of Object.entries(MAIN_ROLES_HELP)) {
+          helpHtml += `<b style="color:#8fb0bd;">• ${role}:</b> ${desc}<br>`;
+        }
+        helpHtml += `<br><b style="color:#e6b85c; font-size:14px;">🚢 บทบาทเฉพาะประจำด่าน (${mapInfo.name}):</b><br>`;
+        for (const [rName, rDesc] of Object.entries(mapInfo.desc)) {
+          helpHtml += `<b style="color:#8fb0bd;">• ${rName}:</b> ${rDesc}<br>`;
+        }
+        $("helpContent").innerHTML = helpHtml;
+        $("helpModal").style.display = "flex";
+      }
+      function closeMainHelpModal() {
+        $("helpModal").style.display = "none";
+      }
+      $("helpBtn").onclick = openMainHelpModal;
+      $("helpClose").onclick = closeMainHelpModal;
+
+      // Event Listeners สำหรับหน้า Start Screen
+      $("startBtn").onclick = () => {
+        $("startScreen").style.display = "none";
+        $("setup").style.display = "flex";
+      };
+      $("startHelpBtn").onclick = openMainHelpModal;
+
+      function escapeHtml(v) {
+        return String(v).replace(
+          /[&<>"']/g,
+          (c) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            })[c],
+        );
+      }
+      function toggleNotebook() {
+        openNotes();
+      }
+      function eventPopup(title, txt, art, cb) {
+        eventCallback = cb || null;
+        $("eventTitle").textContent = title;
+        $("eventText").textContent = txt;
+        $("eventArt").textContent = art || "🕯️";
+        $("eventPopup").style.display = "flex";
+      }
+      function closeEvent() {
+        if ($("eventPopup").style.display !== "flex") return;
+        $("eventPopup").style.display = "none";
+        const cb = eventCallback;
+        eventCallback = null;
+        if (cb) cb();
+      }
+      $("eventContinue").onclick = closeEvent;
+
+      const zone = (o, fl) => {
+        let b = 0,
+          bd = 1e9;
+        DOORS.forEach((d, i) => {
+          if (d.fl !== fl) return;
+          const q = Math.hypot(d.sx - o.x, d.sy - o.y);
+          if (q < bd) {
+            bd = q;
+            b = i;
+          }
+        });
+        return "หน้า " + DOORS[b].name;
+      };
+      function observe() {
+        const h = Math.floor(hourNow());
+        NPCS.forEach((n) => {
+          if (n.out || n.hidden) return;
+          chars.forEach((c) => {
+            if (c === n || c.out || c.hidden || (c === ME ? CF : c.fl) !== n.fl)
+              return;
+            const o = c === ME ? P : c;
+            if (Math.hypot(o.x - n.x, o.y - n.y) > 48) return;
+            n.seen = (n.seen || []).filter((s) => s.w !== c.name);
+            n.seen.push({ w: c.name, z: zone(o, n.fl), h });
+            if (n.seen.length > 5) n.seen.shift();
+          });
+        });
+      }
+
+      function statement(n) {
+        if (EVIL(n.role)) {
+          const ot = alive().filter((c) => c !== n && !EVIL(c.role));
+          if (Math.random() < 0.6 && ot.length) {
+            const fakeTarget = rnd(ot);
+            fakeTarget.knownRoom = true;
+            return (
+              "ผมเห็น " +
+              fakeTarget.name +
+              " (อยู่ห้อง " +
+              DOORS[fakeTarget.door].name +
+              ") เดินวนอยู่แถวทางเดินตอนดึก น่าสงสัยนะ"
+            );
+          }
+          return (
+            "ผมนอนหลับสนิทในห้อง " +
+            DOORS[n.door].name +
+            " ทั้งคืน ไม่ได้ยินอะไรเลย"
+          );
+        }
+        const chosen = rnd(MASTER_STATEMENTS);
+        return typeof chosen === "function" ? chosen(n) : chosen;
+      }
+
+      const ME = {
+        name: "คุณ",
+        door: 0,
+        role: null,
+        out: false,
+        knownRoom: true,
+      };
+      NPCS.forEach((n) => {
+        n.role = null;
+        n.out = false;
+        n.knownRoom = false;
+      });
+      const chars = [ME, ...NPCS],
+        G = { day: 1, voted: false, ended: false };
+      const alive = () => chars.filter((c) => !c.out);
+      const occupant = (di) => chars.find((c) => c.door === di && !c.out);
+      const rnd = (a) => a[(Math.random() * a.length) | 0];
+      function reveal() {
+        return chars.map((c) => c.name + " = " + RN[c.role]).join(", ");
+      }
+
+      function winCheck() {
+        if (G.policeLost)
+          return { t: "ตำรวจจับผิดครบ 2 ครั้ง ฝ่ายร้ายชนะทันที" };
+        if (ME.out)
+          return { t: ME.dead ? "คุณถูกสังหาร ฝ่ายร้ายชนะ" : "คุณถูกจับกุม" };
+        const a = alive(),
+          ev = a.filter((c) => EVIL(c.role)).length;
+        if (ev === 0) return { t: "ฝ่ายดีชนะ จับโจรและสายลับได้ครบ" };
+        if (ev >= a.length - ev)
+          return { t: "ฝ่ายร้ายชนะ คนร้ายมีจำนวนเท่าฝ่ายดีแล้ว" };
+        return null;
+      }
+      function wrap(msg) {
+        const w = winCheck();
+        if (!w) return msg;
+        G.ended = true;
+        return msg + "\n▶ จบเกม: " + w.t + " · " + reveal();
+      }
+
+      function startNight() {
+        if (G.ended) return say("จบเกมแล้ว", "รีเฟรชหน้าเพื่อเริ่มเกมใหม่");
+        const act =
+          {
+            Police: "เดินไปที่ประตูห้องเป้าหมายแล้วกด E เพื่อดักซุ่ม",
+            Detective: "เดินไปที่ประตูห้องเป้าหมายแล้วกด E เพื่อสืบค้น",
+            Killer: "เดินไปที่ประตูห้องเป้าหมายแล้วกด E เพื่อบุกโจมตี",
+            Spy: "เดินไปที่ประตูห้องเป้าหมายแล้วกด E เพื่อสืบค้น",
+          }[ME.role] || "คืนนี้คุณไม่มี action พิเศษ กลับห้องแล้วกด E เพื่อนอน";
+        say(
+          "เริ่มปฏิบัติการกลางคืน",
+          act + "\nหากกลับถึงประตูห้องตัวเอง กด E เพื่อจบคืน",
+        );
+      }
+
+      function endNight(pt) {
+        const killerAlive = chars.find((c) => c.role === "Killer" && !c.out);
+        if (!killerAlive) {
+          const spyCandidate = chars.find((c) => c.role === "Spy" && !c.out);
+          if (spyCandidate) {
+            spyCandidate.role = "Killer";
+            if (spyCandidate === ME) {
+              note(
+                "🚨 ข่าวฉุกเฉิน: ฆาตกรตัวจริงถูกกำจัด! คุณได้รับช่วงสืบทอดบทบาทเป็น [โจร] คนใหม่!",
+              );
+            } else {
+              note("🚨 สายลับได้รับช่วงสืบทอดเป็นฆาตกรคนใหม่แล้ว!");
+            }
+          }
+        }
+
+        const aiT = (x) =>
+          Math.random() < 0.85
+            ? rnd(alive().filter((c) => c !== x)).door
+            : (Math.random() * DOORS.length) | 0;
+        const act = {};
+        alive().forEach((c) => {
+          act[c.role] = act[c.role] || { c, t: c === ME ? pt : aiT(c) };
+        });
+
+        const rep = [];
+        const snap = pt != null ? occupant(pt) : null;
+        const Pl = act.Police;
+        const K = act.Killer || act.Spy;
+
+        let caught = false;
+        const dets = act.Detective;
+        const dsn = dets && dets.t != null ? occupant(dets.t) : null;
+
+        if (dets && dets.c !== ME && dsn) {
+          dsn.knownRoom = true;
+          dsn.inspectedRoom = DOORS[dets.t].name;
+          note(
+            "🕵️ [บันทึกนักสืบ AI] นักสืบสืบทราบว่า " +
+              dsn.name +
+              " พักอยู่ " +
+              DOORS[dets.t].name,
+          );
+        }
+
+        if (K && K.t != null) {
+          const rm = DOORS[K.t].name,
+            v = occupant(K.t);
+          if (Pl && Pl.t === K.t && Pl.c !== K.c) {
+            caught = true;
+            K.c.out = true;
+            rep.push(
+              "ตำรวจดักซุ่มที่ " +
+                rm +
+                " และจับผู้บุกรุกได้ — คือ " +
+                K.c.name +
+                " (" +
+                RN[K.c.role] +
+                ")",
+            );
+          } else if (v && v !== K.c) {
+            v.out = true;
+            v.dead = true;
+            v.knownRoom = true;
+            v.inspectedRoom = DOORS[v.door].name;
+            rep.push("พบศพ " + v.name + " ใน " + rm);
+          } else {
+            rep.push("พบร่องรอยบุกรุกที่ " + rm + " แต่ไม่มีใครเสียชีวิต");
+          }
+        }
+
+        if (!ME.out) {
+          if ((ME.role === "Detective" || ME.role === "Spy") && pt != null) {
+            if (snap) {
+              snap.knownRoom = true;
+              snap.inspectedRoom = DOORS[pt].name;
+            }
+            rep.push(
+              "[ผลค้นของคุณ] " +
+                DOORS[pt].name +
+                ": " +
+                (snap ? "มีคนอยู่ — " + snap.name : "ไม่มีใครอยู่"),
+            );
+          }
+          if (ME.role === "Police" && pt != null && !caught)
+            rep.push("[ผลดักซุ่ม] ไม่มีใครบุกห้องที่คุณเฝ้า");
+        }
+
+        const hot = K && K.t != null ? K.t : null;
+        NPCS.forEach((n) => {
+          n.know = [];
+          if (n.out) return;
+          if (
+            hot != null &&
+            n.door !== hot &&
+            n.door >> 2 === hot >> 2 &&
+            Math.abs(n.door - hot) <= 1
+          ) {
+            n.know.push(
+              "ตอนดึกผมอยู่แถวห้อง " +
+                DOORS[n.door].name +
+                " แล้วได้ยินเสียงดังมาจากแถว " +
+                DOORS[hot].name,
+            );
+          }
+          if (dets && dets.c === n && dets.t != null) {
+            n.know.push(
+              "เมื่อคืนผมค้น " +
+                DOORS[dets.t].name +
+                (dsn ? " เจอ " + dsn.name + " อยู่ข้างใน" : " ไม่มีใครอยู่"),
+            );
+          }
+        });
+
+        rep.forEach((r) => note("คืน " + G.day + ": " + r));
+
+        const k = Math.floor((minutes - 360) / 1440) + 1;
+        minutes = k * 1440 + 390;
+        fade = 1;
+        G.day = k + 1;
+        G.voted = false;
+
+        NPCS.forEach((n) => {
+          if (n.out) return;
+          n.hidden = false;
+          n.x = DOORS[n.door].sx;
+          n.y = DOORS[n.door].sy;
+          n.wait = Math.random() * 2;
+        });
+
+        CF = ME.fl;
+        P.x = DOORS[ME.door].sx;
+        P.y = DOORS[ME.door].sy;
+        P.dir = "down";
+        lastMin = -1;
+        G.toDay = true;
+
+        const morning = wrap(
+          rep.join("\n") || "คืนนี้เงียบสงบ ไม่มีใครเป็นอะไร",
+        );
+        eventPopup(
+          "เช้าวันที่ " + G.day,
+          morning,
+          rep.some((x) => x.includes("พบศพ")) ? "🩸" : "🌅",
+          () => {
+            if (G.ended) return;
+            G.toDay = false;
+            toDay();
+            if (G.q && G.q.length) nextSpeech();
+            else dayMenu();
+          },
+        );
+      }
+
+      function startVote() {
+        if (dlg.open) return;
+        if (G.ended) return say("จบเกมแล้ว", "รีเฟรชหน้าเพื่อเริ่มเกมใหม่");
+        if (isNight(hourNow()))
+          return say(
+            "ที่ประชุม",
+            "โหวตได้เฉพาะช่วงเช้าถึงเย็น ตอนนี้ทุกคนกำลังจะเข้าห้อง",
+          );
+        if (G.voted) return say("ที่ประชุม", "วันนี้โหวตไปแล้ว รอคืนนี้ก่อน");
+
+        const opts = [
+          { label: "งดออกเสียง", v: -1 },
+          ...alive()
+            .filter((c) => c !== ME)
+            .map((c) => ({ label: c.name, v: chars.indexOf(c) })),
+        ];
+
+        menu(
+          "โหวตจับกุม — เลือกผู้ต้องสงสัย (ความน่าเชื่อถือของคุณ: " +
+            Math.round(playerTrust * 100) +
+            "%)",
+          opts,
+          (v) => {
+            G.voted = true;
+            G.toNight = true;
+            const tally = {};
+
+            if (v >= 0) tally[v] = 1;
+
+            alive()
+              .filter((c) => c !== ME)
+              .forEach((c) => {
+                let voteTarget = null;
+                if (v >= 0 && Math.random() < 0.3 + playerTrust * 0.5) {
+                  voteTarget = v;
+                } else {
+                  const pool = alive().filter(
+                    (x) =>
+                      x !== c &&
+                      !(EVIL(c.role) && EVIL(x.role)) &&
+                      (x !== ME || Math.random() < 0.15),
+                  );
+                  if (pool.length) voteTarget = chars.indexOf(rnd(pool));
+                }
+                if (voteTarget !== null) {
+                  tally[voteTarget] = (tally[voteTarget] || 0) + 1;
+                }
+              });
+
+            const top = Object.entries(tally).sort((a, b) => b[1] - a[1]);
+
+            if (
+              !top.length ||
+              top[0][1] < 2 ||
+              (top[1] && top[1][1] === top[0][1])
+            ) {
+              return eventPopup(
+                "ผลการลงคะแนน",
+                "คะแนนกระจัดกระจาย ไม่มีใครถูกจับกุมวันนี้",
+                "⚖️",
+                () => {
+                  G.toNight = false;
+                  if (!G.ended) toNight();
+                },
+              );
+            }
+
+            const c = chars[+top[0][0]];
+            c.out = true;
+            c.jailed = true;
+            c.knownRoom = true;
+            c.inspectedRoom = DOORS[c.door].name;
+
+            if (v === +top[0][0]) {
+              if (EVIL(c.role)) {
+                playerTrust = Math.min(1.5, playerTrust + 0.35);
+              } else {
+                playerTrust = Math.max(0.1, playerTrust - 0.4);
+              }
+            }
+
+            if (
+              ME.role === "Police" &&
+              !EVIL(c.role) &&
+              (G.wrong = (G.wrong || 0) + 1) >= 2
+            ) {
+              G.policeLost = true;
+            }
+
+            note("วัน " + G.day + " โหวตจับ " + c.name + " = " + RN[c.role]);
+            const result = wrap(
+              c.name +
+                " ถูกควบคุมตัว บทบาทคือ " +
+                RN[c.role] +
+                (EVIL(c.role) ? " — จับถูกคน!" : " — จับผิดคนแล้ว!"),
+            );
+
+            eventPopup(
+              G.ended ? "คดีสิ้นสุด" : "ผลการลงคะแนน",
+              result,
+              EVIL(c.role) ? "⛓️" : "🚨",
+              () => {
+                G.toNight = false;
+                if (!G.ended) toNight();
+              },
+            );
+          },
+        );
+      }
+
+      function intro() {
+        const d = {
+          Police:
+            "ตอนกลางคืนเลือกห้องเพื่อดักซุ่ม ถ้าโจรบุกห้องนั้นจะถูกจับทันที",
+          Detective: "ตอนกลางคืนเลือกค้น 1 ห้องเพื่อดูว่าใครอยู่",
+          Killer: "ตอนกลางคืนเลือกห้องเพื่อโจมตี ระวังตำรวจดักซุ่ม",
+          Spy: "ตอนกลางคืนเลือกค้น 1 ห้อง และรับช่วงโจมตีถ้าโจรถูกจับ",
+          Civilian: "คุณไม่มีพลังพิเศษ ใช้การสังเกตและพูดคุยหาตัวคนร้าย",
+        }[ME.role];
+        const pt = EVIL(ME.role)
+          ? " พวกเดียวกันของคุณคือ " +
+            chars.find((c) => c !== ME && EVIL(c.role)).name +
+            "."
+          : "";
+        say(
+          "บทบาทของคุณ: " + RN[ME.role],
+          d +
+            pt +
+            "\nE = คุย/เลือก/ทำ action · Q = ย้อนกลับ · N = สมุดจด · I = คู่มือ · V = โหวต",
+        );
+      }
+
+      const SK = ["#f0c8a0", "#d9a679", "#c68a5e", "#b97b51", "#f3d2b3"],
+        HR = ["#2b1d16", "#15151a", "#8a3d2b", "#cfcfcf", "#3a2a1c"],
+        SH = ["#3f6f8f", "#d96767", "#69bd91", "#78a9df", "#f1ece0", "#b49be7"],
+        PN = ["#2b3a55", "#33384a", "#5a3d6b", "#4a3a2a", "#2c2c34"];
+
+      function begin(mk, role) {
+        currentMapKey = mk;
+        const mp = MAPD[mk];
+        DOORS.length = 0;
+        FLOORS = mp.f.map((f) => f[0]);
+
+        mp.f.forEach((f, fl) => {
+          for (let i = 0; i < 8; i++) {
+            const top = i < 4;
+            DOORS.push({
+              col: COLS[i % 4],
+              row: top ? 3 : 8,
+              fl,
+              name: f[1] + (i + 1),
+              sx: COLS[i % 4] * T,
+              sy: top ? 54 : 112,
+            });
+          }
+        });
+
+        const ds = [...DOORS.keys()].sort(() => Math.random() - 0.5);
+        NPCS.length = 0;
+
+        NMS.forEach((nm, i) =>
+          NPCS.push({
+            name: nm,
+            door: ds[i],
+            pal: {
+              skin: rnd(SK),
+              hair: rnd(HR),
+              shirt: rnd(SH),
+              pants: rnd(PN),
+            },
+            lines: [rnd(FLAVOR), rnd(FLAVOR)],
+            late: "ดึกแล้ว ผมขอกลับห้องก่อนนะ",
+            knownRoom: false,
+          }),
+        );
+
+        NPCS.forEach(initNpc);
+
+        ME.door = ds[13];
+        ME.fl = DOORS[ME.door].fl;
+        ME.role = role;
+        ME.out = false;
+        ME.dead = false;
+        ME.knownRoom = true;
+        playerTrust = 1.0;
+
+        const slots = ["Killer", "Spy", "Police", "Detective", ...mp.r];
+        slots.splice(slots.indexOf(role), 1);
+        slots.sort(() => Math.random() - 0.5);
+        NPCS.forEach((n, i) => (n.role = slots[i]));
+
+        chars.length = 0;
+        chars.push(ME, ...NPCS);
+        chars.forEach((c) => {
+          if (!RN[c.role]) RN[c.role] = c.role;
+        });
+
+        const vs = NPCS.filter(
+          (n) => !["Killer", "Spy", "Police", "Detective"].includes(n.role),
+        )
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 2);
+        vs.forEach((v) => {
+          v.out = true;
+          v.dead = true;
+          v.hidden = true;
+          v.knownRoom = true;
+          v.inspectedRoom = DOORS[v.door].name;
+        });
+
+        vs.forEach((v) => {
+          NPCS.forEach((n) => {
+            if (
+              !n.out &&
+              n.door >> 2 === v.door >> 2 &&
+              Math.abs(n.door - v.door) <= 1
+            ) {
+              n.know.push(
+                "เมื่อคืนผมอยู่แถวห้อง " +
+                  DOORS[n.door].name +
+                  " แล้วได้ยินเสียงดังมาจากแถว " +
+                  DOORS[v.door].name,
+              );
+            }
+          });
+        });
+
+        CF = ME.fl;
+        P.x = DOORS[ME.door].sx;
+        P.y = DOORS[ME.door].sy;
+        P.dir = "down";
+
+        minutes = 720;
+        scene = "day";
+        G.toNight = G.toDay = G.toSleep = false;
+        fade = 0;
+        lastMin = -1;
+        G.day = 1;
+        G.voted = false;
+        G.ended = false;
+        G.wrong = 0;
+        G.policeLost = false;
+        NB.length = 0;
+
+        window.menuOpen = false;
+        window.menuBtns = [];
+        $("sm").style.display = "none";
+        dlg.open = false;
+        noteIndex = 0;
+
+        $("setup").style.display = "none";
+        $("game").style.display = "flex";
+        resize();
+
+        vs.forEach((v) =>
+          note(
+            "พบศพ " +
+              v.name +
+              " ที่ " +
+              DOORS[v.door].name +
+              " (" +
+              v.role +
+              ")",
+          ),
+        );
+        note("ห้องของคุณคือ " + DOORS[ME.door].name + " (" + FLOORS[CF] + ")");
+
+        intro();
+
+        let deadList = vs
+          .map((v) => v.name + " ที่ " + DOORS[v.door].name)
+          .join(" และ ");
+        let currentFull = typeof full !== "undefined" ? full : "";
+
+        full =
+          "ประกาศฉุกเฉิน Day 1: พบศพ 2 ราย - " +
+          deadList +
+          " ทุกคนต้องช่วยกันสืบหาความจริง\n\n" +
+          currentFull.replace("A-101", DOORS[ME.door].name) +
+          "\nบันไดอยู่มุมขวาของดาดฟ้า กด E เพื่อเปลี่ยนชั้น";
+
+        idx = 0;
+        typing = true;
+        startTalk();
+      }
+
+      let selMap = "yacht",
+        selRole = "Police";
+      document.querySelectorAll("#setup [data-map],#setup [data-role]").forEach(
+        (el) =>
+          (el.onclick = () => {
+            const k = el.dataset.map ? "map" : "role";
+            document
+              .querySelectorAll("#setup [data-" + k + "]")
+              .forEach((x) => x.classList.remove("on"));
+            el.classList.add("on");
+            if (k === "map") selMap = el.dataset.map;
+            else selRole = el.dataset.role;
+          }),
+      );
+      $("go").onclick = () => begin(selMap, selRole);
+
+      const GL = {
+        A: [2, 5, 7, 5, 5],
+        B: [6, 5, 6, 5, 6],
+        C: [3, 4, 4, 4, 3],
+        D: [6, 5, 5, 5, 6],
+        E: [7, 4, 6, 4, 7],
+        F: [7, 4, 6, 4, 4],
+        G: [3, 4, 5, 5, 3],
+        H: [5, 5, 7, 5, 5],
+        I: [7, 2, 2, 2, 7],
+        J: [1, 1, 1, 5, 2],
+        K: [5, 5, 6, 5, 5],
+        L: [4, 4, 4, 4, 7],
+        M: [5, 7, 7, 5, 5],
+        N: [6, 5, 5, 5, 5],
+        O: [2, 5, 5, 5, 2],
+        P: [6, 5, 6, 4, 4],
+        Q: [2, 5, 5, 6, 3],
+        R: [6, 5, 6, 5, 5],
+        S: [3, 4, 2, 1, 6],
+        T: [7, 2, 2, 2, 2],
+        U: [5, 5, 5, 5, 7],
+        V: [5, 5, 5, 5, 2],
+        W: [5, 5, 7, 7, 5],
+        X: [5, 5, 2, 5, 5],
+        Y: [5, 5, 2, 2, 2],
+        Z: [7, 1, 2, 4, 7],
+        0: [7, 5, 5, 5, 7],
+        1: [2, 6, 2, 2, 7],
+        2: [6, 1, 2, 4, 7],
+        3: [6, 1, 2, 1, 6],
+        4: [5, 5, 7, 1, 1],
+        5: [7, 4, 6, 1, 6],
+        6: [3, 4, 7, 5, 7],
+        7: [7, 1, 2, 2, 2],
+        8: [7, 5, 7, 5, 7],
+        9: [7, 5, 7, 1, 6],
+        "-": [0, 0, 7, 0, 0],
+        ".": [0, 0, 0, 0, 2],
+        " ": [0, 0, 0, 0, 0],
+      };
+      function tag(s, x, y, c) {
+        s = s.toUpperCase().slice(0, 6);
+        const x0 = Math.round(x - (s.length * 4 - 1) / 2),
+          y0 = y - 4;
+        const put = (dx, dy, col) => {
+          g.fillStyle = col;
+          [...s].forEach((ch, i) => {
+            const gl = GL[ch] || GL[" "];
+            for (let r = 0; r < 5; r++)
+              for (let q = 0; q < 3; q++)
+                if ((gl[r] >> (2 - q)) & 1)
+                  g.fillRect(x0 + i * 4 + q + dx, y0 + r + dy, 1, 1);
+          });
+        };
+        [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+        ].forEach((o) => put(o[0], o[1], "#0a1219"));
+        put(0, 0, c);
+      }
+      function roomLabels() {
+        DOORS.forEach((d) => {
+          if (d.fl !== CF) return;
+          tag(
+            d.name.split(" ").pop(),
+            d.col * T + 8,
+            d.row === 3 ? 46 : 155,
+            d === DOORS[ME.door] ? "#e6b85c" : "#f1ece0",
+          );
+        });
+      }
+      function clockUp() {
+        const m = Math.floor(minutes);
+        if (m === lastMin) return;
+        lastMin = m;
+        const day = Math.max(1, Math.floor((m - 360) / 1440) + 1),
+          hh = Math.floor(m / 60) % 24,
+          mm = m % 60;
+        $("clock").textContent =
+          "DAY " +
+          day +
+          " · " +
+          String(hh).padStart(2, "0") +
+          ":" +
+          String(mm).padStart(2, "0") +
+          " · ห้องอาหาร";
+      }
+      function drawDining() {
+        const t = performance.now() / 1000,
+          CX = 160,
+          CY = 108;
+        for (let ty = 0; ty < 12; ty++)
+          for (let tx = 0; tx < 20; tx++) {
+            const x = tx * 16,
+              y = ty * 16;
+            if (ty < 3) {
+              R(g, x, y, 16, 16, ty < 2 ? "#6b3f4a" : "#4f2d38");
+              if (ty === 2) R(g, x, y + 12, 16, 4, "#3d2430");
+              if (ty === 1 && tx % 5 === 2) {
+                R(g, x + 1, y + 2, 14, 10, "#2b4a5e");
+                R(g, x + 1, y + 2, 14, 2, "#8fb0bd");
+                R(g, x + 7, y + 2, 2, 10, "#6b3f4a");
+              }
+            } else {
+              R(g, x, y, 16, 16, (tx + ty) % 2 ? "#b4885a" : "#a97d50");
+              R(g, x, y + 15, 16, 1, "#8a6340");
+            }
+          }
+        for (let dy = -18; dy <= 18; dy++) {
+          const hw = Math.round(46 * Math.sqrt(1 - (dy / 19) ** 2));
+          R(
+            g,
+            CX - hw,
+            CY + dy,
+            2 * hw,
+            1,
+            dy < -14 ? "#c28a58" : dy > 14 ? "#6d4a2e" : "#8b5e3c",
+          );
+        }
+        R(g, CX - 3, CY - 6, 6, 8, "#f1ece0");
+        R(g, CX - 1, CY - 9 + (Math.sin(t * 9) > 0 ? 0 : 1), 2, 3, "#ffd98a");
+        const n = chars.length,
+          list = [];
+        chars.forEach((c, i) => {
+          const a = (Math.PI * 2 * i) / n - Math.PI / 2;
+          list.push({
+            c,
+            i,
+            a,
+            x: Math.round(CX + 74 * Math.cos(a)),
+            y: Math.round(CY + 36 * Math.sin(a)),
+          });
+        });
+        list
+          .sort((p, q) => p.y - q.y)
+          .forEach(({ c, i, a, x, y }) => {
+            R(g, x - 6, y - 4, 12, 12, "#5a3d2a");
+            R(g, x - 6, y - 4, 12, 2, "#7a5236");
+            if (c.out) {
+              R(g, x - 1, y - 2, 2, 5, "#f1ece0");
+              R(
+                g,
+                x - 1,
+                y - 4 + (Math.sin(t * 8 + i) > 0 ? 0 : 1),
+                2,
+                2,
+                "#ffd98a",
+              );
+              return;
+            }
+            const s = Math.sin(a),
+              k = Math.cos(a),
+              dir =
+                s < -0.5 ? "down" : s > 0.5 ? "up" : k > 0 ? "left" : "right",
+              bob = Math.sin(t * 2 + i) > 0.85 ? 1 : 0;
+            drawChar(g, x - 8, y - 12 + bob, dir, 0, c === ME ? PAL.me : c.pal);
+            tag(
+              c === ME ? "YOU" : c.name,
+              x,
+              y - 13 + bob,
+              c === ME ? "#e6b85c" : "#f1ece0",
+            );
+            if (G.spk === c) {
+              R(g, x - 2, y - 24, 5, 1, "#ffd98a");
+              R(g, x - 1, y - 23, 3, 1, "#ffd98a");
+              R(g, x, y - 22, 1, 1, "#ffd98a");
+            }
+          });
+      }
+
+      function dayMenu() {
+        if (dlg.open || G.ended) return;
+        $("hint").textContent = "";
+        menu(
+          "ประชุม วันที่ " + G.day,
+          [
+            { label: "📓 สมุดจด", v: "n" },
+            { label: "💬 พูดคุยเพิ่มเติม", v: "a" },
+            { label: "🗳️ โหวตจับกุม", v: "v" },
+          ],
+          (v) => {
+            if (v === "n") return openNotes();
+            if (v === "v") return startVote();
+            if (v === "a") {
+              menu(
+                "คุยกับใคร",
+                [
+                  ...alive()
+                    .filter((c) => c !== ME)
+                    .map((c) => ({ label: c.name, v: c })),
+                  { label: "ย้อนกลับ", v: "b" },
+                ],
+                (w) => {
+                  if (w === "b") return dayMenu();
+                  const tx = statement(w);
+                  say(w.name, tx, w.pal);
+                  note("วัน " + G.day + " " + w.name + " (ถูกถาม): " + tx);
+                },
+              );
+            }
+          },
+        );
+      }
+
+      function afterClose() {
+        if (G.ended) return;
+        if (G.toNight) {
+          G.toNight = false;
+          G.talking = false;
+          G.spk = null;
+          return toNight();
+        }
+        if (G.toSleep) {
+          G.toSleep = false;
+          return startNight();
+        }
+        if (G.toDay) {
+          G.toDay = false;
+          toDay();
+        }
+        if (scene === "day") {
+          if (G.q && G.q.length) return nextSpeech();
+          G.talking = false;
+          G.spk = null;
+          dayMenu();
+        }
+      }
+      function toDay() {
+        const k = Math.floor((minutes - 360) / 1440);
+        minutes = k * 1440 + 720;
+        scene = "day";
+        fade = 1;
+        lastMin = -1;
+        NPCS.forEach((n) => {
+          n.hidden = !!n.out;
+        });
+        $("hint").textContent = "";
+        startTalk();
+      }
+      function toNight() {
+        const k = Math.floor((minutes - 360) / 1440);
+        minutes = k * 1440 + 1260;
+        scene = "night";
+        fade = 1;
+        lastMin = -1;
+        G.forced = false;
+        NPCS.forEach((n) => {
+          if (n.out) return;
+          n.hidden = true;
+          n.x = DOORS[n.door].sx;
+          n.y = DOORS[n.door].sy;
+          n.wait = Math.random() * 2;
+          n.seen = [];
+        });
+        CF = ME.fl;
+        P.x = DOORS[ME.door].sx;
+        P.y = DOORS[ME.door].sy;
+        P.dir = "down";
+        say(
+          "คืนที่ " + G.day,
+          "ทุกคนอยู่ในห้อง ไม่มีใครเดินให้พบเห็น\nเดินไปยังประตูห้องเป้าหมายแล้วกด E เพื่อทำ action ตามบทบาทของคุณ หรือกลับห้องตัวเองเพื่อจบคืน",
+        );
+      }
+      document.body.appendChild($("pad"));
+      function menuHl() {
+        const b = window.menuBtns || [];
+        b.forEach((x, i) => x.classList.toggle("sel", i === window.menuSel));
+        const t = b[window.menuSel];
+        if (t && t.scrollIntoView) t.scrollIntoView({ block: "nearest" });
+      }
+
+      function menuKey(k) {
+        const b = window.menuBtns || [];
+        if (!b.length) return false;
+        const n = b.length;
+        if (k === "ArrowUp" || k === "w" || k === "W")
+          window.menuSel = (window.menuSel + n - 1) % n;
+        else if (k === "ArrowDown" || k === "s" || k === "S")
+          window.menuSel = (window.menuSel + 1) % n;
+        else if (k === "Enter" || k === "e" || k === "E" || k === " ") {
+          b[window.menuSel].click();
+          return true;
+        } else if (/^[1-9]$/.test(k) && b[+k - 1]) {
+          b[+k - 1].click();
+          return true;
+        } else return false;
+        menuHl();
+        return true;
+      }
+
+      const inStartScreen = () => $("startScreen").style.display !== "none";
+      const inSetup = () => $("setup").style.display !== "none";
+
+      const SI = [
+        ...document.querySelectorAll("#setup .ch button,#go,#helpBtn"),
+      ];
+      let sf = 0;
+      function sHl() {
+        SI.forEach((b, i) => b.classList.toggle("foc", i === sf));
+        if (SI[sf] && SI[sf].scrollIntoView)
+          SI[sf].scrollIntoView({ block: "nearest" });
+      }
+      function setupKey(e) {
+        const k = e.key;
+        if (k === "ArrowUp" || k === "w" || k === "W")
+          sf = (sf + SI.length - 1) % SI.length;
+        else if (k === "ArrowDown" || k === "s" || k === "S")
+          sf = (sf + 1) % SI.length;
+        else if (k === "Enter" || k === "e" || k === "E" || k === " ") {
+          const b = SI[sf];
+          b.click();
+          if (b.id === "go" || b.id === "helpBtn") return true;
+          sf = b.dataset.map ? 3 : 7;
+        } else return false;
+        sHl();
+        return true;
+      }
+      sHl();
+
+      function menu(title, opts, cb) {
+        dlg.open = true;
+        window.menuOpen = true;
+        const sm = $("sm");
+        sm.innerHTML = "";
+        sm.style.display = "block";
+        const t = document.createElement("div");
+        t.className = "mt";
+        t.textContent = title;
+        sm.appendChild(t);
+        window.menuBtns = opts.map((o) => {
+          const b = document.createElement("div");
+          b.className = "mi";
+          b.textContent = o.label;
+          b.onclick = () => {
+            sm.style.display = "none";
+            window.menuOpen = false;
+            dlg.open = false;
+            cb(o.v);
+          };
+          sm.appendChild(b);
+          return b;
+        });
+        window.menuSel = 0;
+        menuHl();
+      }
+
+      function startTalk() {
+        const sp = alive()
+            .filter((c) => c !== ME)
+            .sort(() => Math.random() - 0.5),
+          q = [];
+        sp.forEach((n) => q.push({ n, t: statement(n) }));
+        sp.forEach((n) => q.push({ n, t: statement(n) }));
+        G.q = q;
+        G.talking = false;
+        G.spk = null;
+      }
+      function nextSpeech() {
+        const it = G.q.shift();
+        G.talking = true;
+        G.spk = it.n;
+        say(it.n.name, it.t, it.n.pal);
+        G.hold = 1.2 + it.t.length * 0.05;
+        note("วัน " + G.day + " " + it.n.name + ": " + it.t);
+      }
+
+      const MAPK = {
+        ArrowUp: "up",
+        w: "up",
+        W: "up",
+        ArrowDown: "down",
+        s: "down",
+        S: "down",
+        ArrowLeft: "left",
+        a: "left",
+        A: "left",
+        ArrowRight: "right",
+        d: "right",
+        D: "right",
+      };
+
+      addEventListener("keydown", (e) => {
+        if (e.key === "i" || e.key === "I") {
+          if ($("helpModal").style.display === "flex") {
+            closeMainHelpModal();
+          } else {
+            openMainHelpModal();
+          }
+          e.preventDefault();
+          return;
+        }
+        if ($("helpModal").style.display === "flex") {
+          if (
+            e.key === "e" ||
+            e.key === "E" ||
+            e.key === "q" ||
+            e.key === "Q" ||
+            e.key === "Enter" ||
+            e.key === "Escape"
+          ) {
+            closeMainHelpModal();
+            e.preventDefault();
+          }
+          return;
+        }
+        if (inStartScreen()) {
+          if (
+            e.key === "Enter" ||
+            e.key === "e" ||
+            e.key === "E" ||
+            e.key === " "
+          ) {
+            $("startBtn").click();
+            e.preventDefault();
+          }
+          return;
+        }
+        if (inSetup()) {
+          if (!e.repeat || e.key.startsWith("Arrow")) {
+            if (setupKey(e)) e.preventDefault();
+          }
+          return;
+        }
+        if ($("eventPopup").style.display === "flex") {
+          if (
+            e.key === "e" ||
+            e.key === "E" ||
+            e.key === "Enter" ||
+            e.key === "q" ||
+            e.key === "Q"
+          ) {
+            closeEvent();
+            e.preventDefault();
+          }
+          return;
+        }
+
+        if (window.menuOpen) {
+          if (e.key === "a" || e.key === "A" || e.key === "ArrowLeft") {
+            const b = window.menuBtns || [];
+            if (b[0] && b[0].textContent.includes("คนก่อนหน้า")) {
+              b[0].click();
+              e.preventDefault();
+              return;
+            }
+          }
+          if (e.key === "d" || e.key === "D" || e.key === "ArrowRight") {
+            const b = window.menuBtns || [];
+            if (b[1] && b[1].textContent.includes("คนถัดไป")) {
+              b[1].click();
+              e.preventDefault();
+              return;
+            }
+          }
+          const contentArea = $("nbContentArea");
+          if (
+            contentArea &&
+            (window.menuSel === 2 ||
+              contentArea.contains(document.activeElement))
+          ) {
+            if (e.key === "w" || e.key === "W" || e.key === "ArrowUp") {
+              contentArea.scrollTop -= 24;
+              e.preventDefault();
+              return;
+            } else if (
+              e.key === "s" ||
+              e.key === "S" ||
+              e.key === "ArrowDown"
+            ) {
+              contentArea.scrollTop += 24;
+              e.preventDefault();
+              return;
+            }
+          }
+          if (e.key === "q" || e.key === "Q" || e.key === "Escape") {
+            const sm = $("sm");
+            sm.style.display = "none";
+            window.menuOpen = false;
+            dlg.open = false;
+            window.menuBtns = [];
+            if (scene === "day") dayMenu();
+            e.preventDefault();
+            return;
+          }
+          if (!e.repeat || e.key.startsWith("Arrow")) {
+            if (menuKey(e.key)) e.preventDefault();
+          }
+          return;
+        }
+
+        if (e.key === "q" || e.key === "Q") {
+          if (dlg.open) {
+            dlg.open = false;
+            afterClose();
+          } else if (scene === "day") dayMenu();
+          e.preventDefault();
+        } else if (MAPK[e.key]) {
+          keys[MAPK[e.key]] = 1;
+          e.preventDefault();
+        } else if (
+          e.key === "e" ||
+          e.key === "E" ||
+          e.key === " " ||
+          e.key === "Enter"
+        ) {
+          if (!e.repeat) interact();
+          e.preventDefault();
+        } else if (e.key === "v" || e.key === "V") {
+          if (!e.repeat) startVote();
+        } else if (e.key === "n" || e.key === "N") {
+          if (!e.repeat) openNotes();
+        }
+      });
+
+      addEventListener("keyup", (e) => {
+        if (MAPK[e.key]) keys[MAPK[e.key]] = 0;
+      });
+      addEventListener("blur", () => {
+        for (const k in keys) keys[k] = 0;
+      });
+
+      document.querySelectorAll("#pad [data-k]").forEach((el) => {
+        const k = el.dataset.k;
+        el.addEventListener("pointerdown", (e) => {
+          e.preventDefault();
+          if ($("helpModal").style.display === "flex") {
+            closeMainHelpModal();
+            return;
+          }
+          if (inStartScreen()) {
+            $("startBtn").click();
+            return;
+          }
+          if (inSetup() || window.menuOpen) {
+            const contentArea = $("nbContentArea");
+            if (window.menuOpen && contentArea && window.menuSel === 2) {
+              if (k === "up") {
+                contentArea.scrollTop -= 24;
+                return;
+              }
+              if (k === "down") {
+                contentArea.scrollTop += 24;
+                return;
+              }
+            }
+            if (window.menuOpen) {
+              if (k === "left") {
+                const b = window.menuBtns || [];
+                if (b[0]) b[0].click();
+                return;
+              }
+              if (k === "right") {
+                const b = window.menuBtns || [];
+                if (b[1]) b[1].click();
+                return;
+              }
+            }
+            const kk = { up: "ArrowUp", down: "ArrowDown", act: "Enter" }[k];
+            if (kk) inSetup() ? setupKey({ key: kk }) : menuKey(kk);
+            return;
+          }
+          k === "act"
+            ? interact()
+            : k === "vote"
+              ? startVote()
+              : k === "notes"
+                ? openNotes()
+                : (keys[k] = 1);
+        });
+        ["pointerup", "pointerleave", "pointercancel"].forEach((ev) =>
+          el.addEventListener(ev, () => {
+            if (k !== "act") keys[k] = 0;
+          }),
+        );
+      });
+
+      function resize() {
+        const avail = Math.min(innerWidth - 24, 960) / 320,
+          availH =
+            (innerHeight -
+              (matchMedia("(pointer:coarse)").matches ? 360 : 290)) /
+            192;
+        const s = Math.max(1, Math.floor(Math.min(avail, availH) * 2) / 2);
+        cv.style.width = 320 * s + "px";
+        cv.style.height = 192 * s + "px";
+        $("game").style.width =
+          Math.max(320 * s + 16, Math.min(innerWidth, 336)) + "px";
+      }
+      addEventListener("resize", resize);
+      resize();
+      let last = performance.now();
+      (function loop(now) {
+        const dt = Math.min(0.05, (now - last) / 1000);
+        last = now;
+        update(dt);
+        draw();
+        requestAnimationFrame(loop);
+      })(last);
+    </script>
+  </body>
+</html>
